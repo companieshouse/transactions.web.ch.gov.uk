@@ -7,7 +7,7 @@ APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [[ -z "${MESOS_SLAVE_PID}" ]]; then
     source ~/.chs_env/private_env
     source ~/.chs_env/global_env
-    source ~/.chs_env/company-accounts.web.ch.gov.uk/env
+    source ~/.chs_env/transactions.web.ch.gov.uk/env
 
     PORT="${TRANSACTIONS_WEB_PORT}"
 else
