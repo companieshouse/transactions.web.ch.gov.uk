@@ -39,7 +39,7 @@ public class TransactionsServiceImplTests {
     private static final String TRANSACTION_ID = "111-222-333";
 
     @BeforeEach
-    private void init() {
+    private void setUp() {
 
         when(apiClientService.getApiClient()).thenReturn(apiClient);
         when(apiClient.transaction(TRANSACTION_ID)).thenReturn(transactionResourceHandler);
@@ -51,9 +51,7 @@ public class TransactionsServiceImplTests {
 
         when(transactionResourceHandler.get()).thenReturn(new Transaction());
 
-        Transaction transaction = transactionService.getTransaction(TRANSACTION_ID);
-
-        assertNotNull(transaction);
+        assertNotNull(transactionService.getTransaction(TRANSACTION_ID));
     }
 
     @Test
@@ -61,6 +59,9 @@ public class TransactionsServiceImplTests {
     void getTransactionApiResponseExceptionThrown() throws ApiErrorResponseException {
 
         when(transactionResourceHandler.get()).thenThrow(ApiErrorResponseException.class);
+
+        assertThrows(ApiErrorResponseException.class,
+                () -> transactionResourceHandler.get());
 
         assertThrows(ServiceException.class,
                 () -> transactionService.getTransaction(TRANSACTION_ID));
