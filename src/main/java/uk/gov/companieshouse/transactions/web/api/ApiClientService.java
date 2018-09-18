@@ -9,5 +9,9 @@ import uk.gov.companieshouse.api.ApiClient;
  */
 public interface ApiClientService {
 
+    /**
+     * Returns an {@link ApiClient} with which to execute API requests
+     * @return an ApiClient
+     */
     ApiClient getApiClient();
 }

@@ -8,6 +8,9 @@ import uk.gov.companieshouse.transactions.web.api.ApiClientService;
 @Component
 public class ApiClientServiceImpl implements ApiClientService {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ApiClient getApiClient() {
         return ApiClientManager.getSDK();
