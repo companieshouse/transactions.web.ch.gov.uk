@@ -2,10 +2,8 @@ package uk.gov.companieshouse.transactions.web.transformer.confirmation.impl;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import org.omg.CORBA.PRIVATE_MEMBER;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.transactions.web.confirmation.ConfirmationDescription;
