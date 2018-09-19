@@ -31,23 +31,18 @@ public class ConfirmationTransformerImpl implements ConfirmationTransformer {
         Confirmation confirmation = new Confirmation();
 
         confirmation.setCompanyName(transaction.getCompanyName());
-
         confirmation.setCompanyNumber(transaction.getCompanyNumber());
 
         String confirmationDescription =
                 ConfirmationDescription.getConfirmationDescription(transaction.getDescription());
-
         confirmation.setConfirmationDescription(confirmationDescription);
 
         Instant closedInstant = Instant.parse(transaction.getClosedAt());
         LocalDateTime closedAt = LocalDateTime.ofInstant(closedInstant, ZoneOffset.UTC);
 
         confirmation.setClosedAtDate(closedAt.format(DATE_FORMATTER));
-
         confirmation.setClosedAtTime(closedAt.format(TIME_FORMATTER));
-
         confirmation.setTransactionId(transaction.getId());
-
         confirmation.setClosedBy(transaction.getClosedBy().get(EMAIL_KEY));
 
         return confirmation;
