@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>User Bar</title>
+    </head>
+    <body>
+        <div th:fragment="userBar" class="js-toggle-nav" id="global-nav">
+            <a href="#navigation" id="signed-in-user-href" class="js-header-toggle" th:text="${userEmail + ':'}"></a>
+            <nav class="content" role="navigation">
+                <ul id="navigation" class="mobile-hidden">
+                    <li class="user" id="signed-in-user" th:text="${userEmail + ': '}" />
+                    <li><a th:href="@{{chsAccountUrl}/user/account(chsAccountUrl=${@environment.getProperty('account.url')})}" id="your-details">Your details</a></li>
+                    <li><a href="/user/transactions" id="your-filings">Your filings</a></li>
+                    <li><a th:href="@{{chsFollowUrl}/admin/monitor(chsFollowUrl=${@environment.getProperty('monitorGui.url')})}" id="companies-you-follow">Companies you follow</a></li>
+                    <li><a href="/signout" id="user-signout">Sign out</a></li>
+                </ul>
+            </nav>
+        </div>
+    </body>
+</html>
