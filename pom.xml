@@ -29,6 +29,8 @@
 
 		<sdk-manager-java.version>1.0.0-rc1</sdk-manager-java.version>
 
+		<lombok.version>1.18.0</lombok.version>
+
 		<spring-test.version>4.3.3.RELEASE</spring-test.version>
 
 		<junit-jupiter-engine.version>5.2.0</junit-jupiter-engine.version>
@@ -66,6 +68,13 @@
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>sdk-manager-java</artifactId>
 			<version>${sdk-manager-java.version}</version>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
 		</dependency>
 
 		<!-- Test Dependencies -->
