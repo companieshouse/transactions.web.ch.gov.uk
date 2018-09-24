@@ -10,7 +10,7 @@
 <body>
 <div id="confirmation-main-content" layout:fragment="content">
 
-  <form id="confirmation-form" th:action="@{''}" th:object="${confirmation}" class="form" method="post">
+  <form id="confirmation-form" th:action="@{''}" th:object="${confirmation}" class="form">
 
     <div class="grid-row">
 
@@ -20,15 +20,17 @@
 
           <p class="font-large">
             <strong th:text="*{companyName}"/>
-            <br />
-            Company number <span th:text="*{companyNumber}"/>
+            <br/>
+            <strong>
+              Company number <span th:text="*{companyNumber}"/>
+            </strong>
           </p>
 
-          <h1 class="font-large">
-            <span th:text="*{confirmationDescription}"/> received
-          </h1>
-
-          <br/>
+          <p class="font-large">
+            <strong>
+              <span th:text="*{confirmationDescription}"/> received
+            </strong>
+          </p>
 
           <p class="font-large">
             on <strong class="bold-large" th:text="*{closedAtDate}"/> at <strong class="bold-large" th:text="*{closedAtTime}"/>
@@ -41,7 +43,7 @@
           </p>
 
         </div>
-  
+
         <p id="confirmation-email">
           We have sent you a confirmation email at <strong th:text="*{closedBy}"/> with your reference number.
         </p>
@@ -52,6 +54,25 @@
         </p>
         <p id="second-email">
           We'll send a second email to confirm that your filing has been processed (normally within 2 working days).
+        </p>
+
+        <h1 class="heading-medium">
+          What do you want to do next?
+        </h1>
+
+        <ul class="list">
+          <li>
+            <a href="/user/transactions">See your filings</a>
+          </li>
+          <li>
+            <a th:href="@{'/company/' + *{companyNumber}}">Return to company overview</a>
+          </li>
+        </ul>
+
+        <p>
+          <span>This is a new service. Help us improve it by
+            <a href="https://www.research.net/r/chfiling" target="_blank">completing our quick survey</a>.
+          </span>
         </p>
 
       </div>
