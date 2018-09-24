@@ -21,7 +21,7 @@ public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
     private static final String EMAIL_KEY = "email";
 
     @Autowired
-    SessionService sessionService;
+    private SessionService sessionService;
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
