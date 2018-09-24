@@ -27,10 +27,10 @@ public class ConfirmationController {
     private static final String ERROR_PAGE = "error";
 
     @Autowired
-    TransactionsService transactionsService;
+    private TransactionsService transactionsService;
 
     @Autowired
-    ConfirmationService confirmationService;
+    private ConfirmationService confirmationService;
 
     @GetMapping
     public String getConfirmation(@PathVariable String transactionId,

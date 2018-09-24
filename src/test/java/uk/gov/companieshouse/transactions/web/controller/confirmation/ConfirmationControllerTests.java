@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmation;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -103,6 +104,8 @@ public class ConfirmationControllerTests {
                 .andExpect(view().name(ERROR_VIEW))
                 .andExpect(status().isOk());
 
+        assertThrows(ServiceException.class, () -> transactionsService.getTransaction(TRANSACTION_ID));
+
         verify(confirmationService, never()).getTransactionConfirmation(any());
     }
 
@@ -121,6 +124,9 @@ public class ConfirmationControllerTests {
         this.mockMvc.perform(get(CONFIRMATION_PATH))
                 .andExpect(view().name(ERROR_VIEW))
                 .andExpect(status().isOk());
+
+        assertThrows(ServiceException.class, () ->
+                confirmationService.getTransactionConfirmation(closedTransaction));
     }
 
 }
