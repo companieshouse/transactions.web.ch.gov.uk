@@ -15,6 +15,9 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     @Autowired
     private ConfirmationTransformer confirmationTransformer;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Confirmation getTransactionConfirmation(Transaction transaction)
                                 throws ServiceException {
