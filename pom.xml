@@ -25,11 +25,15 @@
 
 		<thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
 
+		<java-session-handler.version>2.0.0-rc4</java-session-handler.version>
+
 		<api-sdk-java.version>2.0.1-rc3</api-sdk-java.version>
 
 		<sdk-manager-java.version>1.0.0-rc1</sdk-manager-java.version>
 
 		<lombok.version>1.18.0</lombok.version>
+
+		<spring-security-core.version>5.0.7.RELEASE</spring-security-core.version>
 
 		<spring-test.version>4.3.3.RELEASE</spring-test.version>
 
@@ -57,6 +61,13 @@
 			<version>${thymeleaf-layout-dialect.version}</version>
 		</dependency>
 
+		<!-- Session Handler -->
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>java-session-handler</artifactId>
+			<version>${java-session-handler.version}</version>
+		</dependency>
+
 		<!-- SDK Dependencies -->
 		<dependency>
 			<groupId>uk.gov.companieshouse</groupId>
@@ -76,6 +87,23 @@
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
 		</dependency>
+
+    <!-- Security dependencies -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+      <version>${spring-security-core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+    </dependency>
 
 		<!-- Test Dependencies -->
 		<dependency>
