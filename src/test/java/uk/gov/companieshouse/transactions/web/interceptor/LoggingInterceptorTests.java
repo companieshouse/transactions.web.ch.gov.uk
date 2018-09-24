@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,10 +61,9 @@ public class LoggingInterceptorTests {
     @Test
     @DisplayName("Tests the interceptor logs the end of the request")
     public void postHandle() {
-        long startTime = System.currentTimeMillis();
         when(session.getAttribute(LogContextProperties.START_TIME_KEY.value()))
-                .thenReturn(startTime);
-        when(httpServletResponse.getStatus()).thenReturn(200);
+                .thenReturn(System.currentTimeMillis());
+        when(httpServletResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
         loggingInterceptor.postHandle(httpServletRequest, httpServletResponse, new Object(),
                 new ModelAndView());
         verify(session, times(1)).getAttribute(LogContextProperties.START_TIME_KEY.value());
@@ -75,7 +75,6 @@ public class LoggingInterceptorTests {
     }
 
     private JSONObject getOutputJson() {
-        String output = out.toString();
-        return new JSONObject(output);
+        return new JSONObject(out.toString());
     }
 }

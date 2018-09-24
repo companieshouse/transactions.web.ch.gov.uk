@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,9 +53,10 @@ public class UserDetailsInterceptorTests {
     @InjectMocks
     private UserDetailsInterceptor userDetailsInterceptor;
 
-    @Test
-    @DisplayName("Tests the interceptor adds the user email to the model for GET requests")
-    void postHandleForGetRequestSuccess() throws Exception {
+    private static Map<String, Object> sessionData;
+
+    @BeforeAll
+    static void setUp() {
 
         Map<String, Object> userProfile = new HashMap<>();
         userProfile.put(EMAIL_KEY, TEST_EMAIL_ADDRESS);
@@ -61,8 +64,13 @@ public class UserDetailsInterceptorTests {
         Map<String, Object> signInInfo = new HashMap<>();
         signInInfo.put(USER_PROFILE_KEY, userProfile);
 
-        Map<String, Object> sessionData = new HashMap<>();
+        sessionData = new HashMap<>();
         sessionData.put(SIGN_IN_KEY, signInInfo);
+    }
+
+    @Test
+    @DisplayName("Tests the interceptor adds the user email to the model for GET requests")
+    void postHandleForGetRequestSuccess() throws Exception {
 
         when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.GET.toString());
@@ -75,15 +83,6 @@ public class UserDetailsInterceptorTests {
     @Test
     @DisplayName("Tests the interceptor adds the user email to the model for POST requests which don't redirect")
     void postHandleForPostRequestError() throws Exception {
-
-        Map<String, Object> userProfile = new HashMap<>();
-        userProfile.put(EMAIL_KEY, TEST_EMAIL_ADDRESS);
-
-        Map<String, Object> signInInfo = new HashMap<>();
-        signInInfo.put(USER_PROFILE_KEY, userProfile);
-
-        Map<String, Object> sessionData = new HashMap<>();
-        sessionData.put(SIGN_IN_KEY, signInInfo);
 
         when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.toString());
@@ -99,7 +98,7 @@ public class UserDetailsInterceptorTests {
     void postHandleForPostRequestIgnored() throws Exception {
 
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.toString());
-        when(modelAndView.getViewName()).thenReturn("redirect:abc");
+        when(modelAndView.getViewName()).thenReturn(UrlBasedViewResolver.REDIRECT_URL_PREFIX + "abc");
 
         userDetailsInterceptor.postHandle(httpServletRequest, httpServletResponse, new Object(), modelAndView);
 
@@ -110,9 +109,7 @@ public class UserDetailsInterceptorTests {
     @DisplayName("Tests the interceptor does not add the user email to the model if no sign in info is available")
     void postHandleForGetRequestWithoutSignInInfoIgnored() throws Exception {
 
-        Map<String, Object> sessionData = new HashMap<>();
-
-        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+        when(sessionService.getSessionDataFromContext()).thenReturn(new HashMap<>());
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.GET.toString());
 
         userDetailsInterceptor.postHandle(httpServletRequest, httpServletResponse, new Object(), modelAndView);
