@@ -48,7 +48,7 @@
 		<mockito-junit-jupiter.version>2.18.0</mockito-junit-jupiter.version>
 
 		<!-- Build Properties -->
-		
+
 		<!-- Maven and Surefire plugins -->
 		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
