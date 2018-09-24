@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Header</title>
+    </head>
+    <body>
+        <th:block th:fragment="header">
+            <header  role="banner" id="global-header" class="with-proposition">
+                <div class="header-wrapper">
+                    <div class="header-global">
+                        <div class="header-logo">
+                            <a href="/" title="Go to the GOV.UK homepage" id="logo" class="content">
+                                Companies House
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="header-proposition">
+                        <div class="content">
+                            <a href="#proposition-links" class="js-header-toggle menu">Menu</a>
+                            <nav id="proposition-menu">
+                                <a href="/" id="proposition-name"> File company accounts </a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </th:block>
+    </body>
+</html>
