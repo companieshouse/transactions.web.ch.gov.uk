@@ -12,4 +12,11 @@ public interface TransactionsService {
      * @throws ServiceException
      */
     Transaction getTransaction(String transactionId) throws ServiceException;
+
+    /**
+     * Determines whether a transaction's status is 'closed'
+     * @param transaction
+     * @return true is a transaction is closed
+     */
+    boolean isTransactionClosed(Transaction transaction);
 }
