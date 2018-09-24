@@ -26,9 +26,7 @@ public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
 
-        if (modelAndView != null && (request.getMethod().equalsIgnoreCase("GET") ||
-                (request.getMethod().equalsIgnoreCase("POST") &&
-                     !modelAndView.getViewName().startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)))) {
+        if (modelAndView != null && shouldAttributeBeAdded(request, modelAndView)) {
 
             Map<String, Object> sessionData = sessionService.getSessionDataFromContext();
             Map<String, Object> signInInfo = (Map<String, Object>) sessionData.get(SIGN_IN_KEY);
@@ -38,5 +36,19 @@ public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
                 modelAndView.addObject(USER_EMAIL, userProfile.get(EMAIL_KEY));
             }
         }
+    }
+
+    /**
+     * Determines whether to add a model attribute; returns true for all {@code GET} requests, and for
+     * {@code POST} requests which don't force a redirect (to cater for form submissions with errors)
+     *
+     * @param request The HttpServletRequest
+     * @param modelAndView The returned ModelAndView
+     * @return true or false
+     */
+    private boolean shouldAttributeBeAdded(HttpServletRequest request, ModelAndView modelAndView) {
+        return (request.getMethod().equalsIgnoreCase("GET") ||
+               (request.getMethod().equalsIgnoreCase("POST") &&
+                !modelAndView.getViewName().startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)));
     }
 }
