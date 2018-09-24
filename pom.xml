@@ -35,6 +35,12 @@
 
 		<spring-security-core.version>5.0.7.RELEASE</spring-security-core.version>
 
+		<structured-logging.version>1.5.0-rc2</structured-logging.version>
+
+		<hamcrest.version>1.3</hamcrest.version>
+
+		<hamcrest-library-version>1.3</hamcrest-library-version>
+
 		<spring-test.version>4.3.3.RELEASE</spring-test.version>
 
 		<junit-jupiter-engine.version>5.2.0</junit-jupiter-engine.version>
@@ -105,7 +111,27 @@
       <artifactId>spring-security-config</artifactId>
     </dependency>
 
+		<!-- Logging -->
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>structured-logging</artifactId>
+			<version>${structured-logging.version}</version>
+		</dependency>
+
 		<!-- Test Dependencies -->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<version>${hamcrest.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>${hamcrest-library-version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
