@@ -18,7 +18,7 @@
 
         <div class="govuk-box-highlight" id="confirmation-details">
 
-          <p class="font-large">
+          <p class="font-large" id="confirmation-company-name-number">
             <strong th:text="*{companyName}"/>
             <br/>
             <strong>
@@ -26,17 +26,17 @@
             </strong>
           </p>
 
-          <p class="font-large">
+          <p class="font-large" id="confirmation-description">
             <strong>
               <span th:text="*{confirmationDescription}"/> received
             </strong>
           </p>
 
-          <p class="font-large">
+          <p class="font-large" id="confirmation-closed-date-time">
             on <strong class="bold-large" th:text="*{closedAtDate}"/> at <strong class="bold-large" th:text="*{closedAtTime}"/>
           </p>
 
-          <p class="font-large">
+          <p class="font-large" id="confirmation-reference">
             Reference number
             <br/>
             <strong th:text="*{transactionId}"></strong>
@@ -56,25 +56,25 @@
           We'll send a second email to confirm that your filing has been processed (normally within 2 working days).
         </p>
 
-        <h1 class="heading-medium">
+        <h1 class="heading-medium" id="confirmation-next-steps-heading">
           What do you want to do next?
         </h1>
 
-        <ul class="list">
+        <ul class="list" id="confirmation-next-steps">
           <li hidden="true" class="onlyJS">
-            <a href="#" onClick="window.print();">Print this page for your records</a>
+            <a id="confirmation-print-link" href="#" onClick="window.print();">Print this page for your records</a>
           </li>
           <li>
-            <a href="/user/transactions">See your filings</a>
+            <a id="confirmation-your-filings" href="/user/transactions">See your filings</a>
           </li>
           <li>
-            <a th:href="@{'/company/' + *{companyNumber}}">Return to company overview</a>
+            <a id="confirmation-company-overview" th:href="@{'/company/' + *{companyNumber}}">Return to company overview</a>
           </li>
         </ul>
 
         <p>
-          <span>This is a new service. Help us improve it by
-            <a href="https://www.research.net/r/chfiling" target="_blank">completing our quick survey</a>.
+          <span id="confirmation-feedback">This is a new service. Help us improve it by
+            <a id="confirmation-feedback-link" href="https://www.research.net/r/chfiling" target="_blank">completing our quick survey</a>.
           </span>
         </p>
 
