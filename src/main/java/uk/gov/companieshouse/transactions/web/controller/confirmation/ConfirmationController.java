@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
@@ -21,8 +22,6 @@ public class ConfirmationController {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
-
-    private static final String CONFIRMATION_PAGE = "transactionConfirmation";
 
     private static final String ERROR_PAGE = "error";
 
@@ -47,7 +46,7 @@ public class ConfirmationController {
 
             model.addAttribute("confirmation", confirmationService.getTransactionConfirmation(transaction));
 
-            return CONFIRMATION_PAGE;
+            return getTemplateName();
 
         } catch (ServiceException ex) {
 
@@ -56,4 +55,9 @@ public class ConfirmationController {
         }
     }
 
+    @ModelAttribute("templateName")
+    private static String getTemplateName() {
+
+        return "transactionConfirmation";
+    }
 }
