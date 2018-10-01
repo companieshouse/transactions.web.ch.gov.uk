@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title layout:title-pattern="$CONTENT_TITLE"></title>
+    <div id="templateName" th:attr="data-id=${templateName}" hidden></div>
     <link
         th:href="@{{cdnUrl}/stylesheets/assets-digital-cabinet-office-gov-uk-static/govuk-template.css?0.17.3(cdnUrl=${@environment.getProperty('cdn.url')})}"
         media="screen" rel="stylesheet" type="text/css" />
@@ -31,5 +32,7 @@
     <script th:src="@{{cdnUrl}/javascripts/vendor/require.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
     <script th:src="@{{cdnUrl}/javascripts/vendor/jquery-1.12.4.min.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
     <script th:src="@{{cdnUrl}/javascripts/app/js-enable.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
+    <script th:src="@{{cdnUrl}/javascripts/app/piwik-enable.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
+    <div th:replace="fragments/piwik :: piwik"></div>
 </body>
 </html>

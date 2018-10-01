@@ -50,6 +50,8 @@ public class ConfirmationControllerTests {
 
     private static final String CONFIRMATION_MODEL_ATTR = "confirmation";
 
+    private static final String TEMPLATE_NAME_ATTR = "templateName";
+
     private static final String ERROR_VIEW = "error";
 
     @BeforeEach
@@ -74,7 +76,8 @@ public class ConfirmationControllerTests {
         this.mockMvc.perform(get(CONFIRMATION_PATH))
                 .andExpect(view().name(CONFIRMATION_VIEW))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR));
+                .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
+                .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
     }
 
     @Test

@@ -49,7 +49,7 @@
         </p>
         <p id="contact-us">
           If you've not received the confirmation, check your spam or junk mail folder. You should
-          <a th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}">contact us</a>
+          <a th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}" class="piwik-event" data-event-id="Contact us">contact us</a>
           if you haven't had an email within 30 minutes.
         </p>
         <p id="second-email">
@@ -62,13 +62,13 @@
 
         <ul class="list" id="confirmation-next-steps">
           <li hidden="true" class="onlyJS">
-            <a id="confirmation-print-link" href="#" onClick="window.print();">Print this page for your records</a>
+            <a id="confirmation-print-link" href="#" onClick="window.print();" class="piwik-event" data-event-id="Print page">Print this page for your records</a>
           </li>
           <li>
-            <a id="confirmation-your-filings" href="/user/transactions">See your filings</a>
+            <a id="confirmation-your-filings" href="/user/transactions" class="piwik-event" data-event-id="Your filings - body">See your filings</a>
           </li>
           <li>
-            <a id="confirmation-company-overview" th:href="@{'/company/' + *{companyNumber}}">Return to company overview</a>
+            <a id="confirmation-company-overview" th:href="@{'/company/' + *{companyNumber}}" class="piwik-event" data-event-id="Return to company">Return to company overview</a>
           </li>
         </ul>
 
