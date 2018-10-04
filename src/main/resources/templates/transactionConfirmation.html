@@ -12,55 +12,56 @@
 
   <form id="confirmation-form" th:action="@{''}" th:object="${confirmation}" class="form">
 
-    <div class="grid-row">
+    <div class="govuk-grid-row">
 
-      <div class="column-two-thirds">
+      <div class="govuk-grid-column-two-thirds">
 
-        <div class="govuk-box-highlight" id="confirmation-details">
+        <div class="govuk-panel govuk-panel--confirmation" id="confirmation-details">
 
-          <p class="font-large" id="confirmation-company-name-number">
-            <strong th:text="*{companyName}"/>
-            <br/>
+          <div class="govuk-panel__body govuk-!-margin-bottom-6" id="confirmation-company-name-number">
             <strong>
+              <span class="uppercase" th:text="*{companyName}"/>
+              <br>
               Company number <span th:text="*{companyNumber}"/>
             </strong>
-          </p>
+          </div>
 
-          <p class="font-large" id="confirmation-description">
-            <strong>
-              <span th:text="*{confirmationDescription}"/> received
-            </strong>
-          </p>
+          <h2 class="govuk-panel__title" id="confirmation-description">
+            <span th:text="*{confirmationDescription}"/> received
+          </h2>
 
-          <p class="font-large" id="confirmation-closed-date-time">
-            on <strong class="bold-large" th:text="*{closedAtDate}"/> at <strong class="bold-large" th:text="*{closedAtTime}"/>
-          </p>
+          <div class="govuk-panel__body govuk-!-margin-bottom-6" id="confirmation-closed-date-time">
+            on
+            <span class="govuk-!-font-weight-bold" th:text="*{closedAtDate}"/>
+            at
+            <span class="govuk-!-font-weight-bold" th:text="*{closedAtTime}"/>
+          </div>
 
-          <p class="font-large" id="confirmation-reference">
-            Reference number
+          <div class="govuk-panel__body" id="confirmation-reference">
+            Your reference number
             <br/>
             <strong th:text="*{transactionId}"></strong>
-          </p>
+          </div>
 
         </div>
 
-        <p id="confirmation-email">
+        <p class="govuk-body" id="confirmation-email">
           We have sent you a confirmation email at <strong th:text="*{closedBy}"/> with your reference number.
         </p>
-        <p id="contact-us">
+        <p class="govuk-body" id="contact-us">
           If you've not received the confirmation, check your spam or junk mail folder. You should
           <a th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}" class="piwik-event" data-event-id="Contact us">contact us</a>
           if you haven't had an email within 30 minutes.
         </p>
-        <p id="second-email">
+        <p class="govuk-body" id="second-email">
           We'll send a second email to confirm that your filing has been processed (normally within 2 working days).
         </p>
 
-        <h1 class="heading-medium" id="confirmation-next-steps-heading">
+        <h1 class="govuk-heading-m" id="confirmation-next-steps-heading">
           What do you want to do next?
         </h1>
 
-        <ul class="list" id="confirmation-next-steps">
+        <ul class="govuk-list" id="confirmation-next-steps">
           <li hidden="true" class="onlyJS">
             <a id="confirmation-print-link" href="#" onClick="window.print();" class="piwik-event" data-event-id="Print page">Print this page for your records</a>
           </li>
@@ -72,7 +73,7 @@
           </li>
         </ul>
 
-        <p>
+        <p class="govuk-body">
           <span id="confirmation-feedback">This is a new service. Help us improve it by
             <a id="confirmation-feedback-link" href="https://www.research.net/r/chfiling" target="_blank">completing our quick survey</a>.
           </span>

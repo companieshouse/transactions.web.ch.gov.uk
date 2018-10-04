@@ -6,13 +6,7 @@
     <title layout:title-pattern="$CONTENT_TITLE"></title>
     <div id="templateName" th:attr="data-id=${templateName}" hidden></div>
     <link
-        th:href="@{{cdnUrl}/stylesheets/assets-digital-cabinet-office-gov-uk-static/govuk-template.css?0.17.3(cdnUrl=${@environment.getProperty('cdn.url')})}"
-        media="screen" rel="stylesheet" type="text/css" />
-    <link
-        th:href="@{{cdnUrl}/stylesheets/application.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
-        media="all" rel="stylesheet" type="text/css" />
-    <link
-        th:href="@{{cdnUrl}/stylesheets/ch-accounts.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
+        th:href="@{{cdnUrl}/stylesheets/small-full-ch-accounts.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
         media="all" rel="stylesheet" type="text/css" />
     <link
         rel="icon"
@@ -22,11 +16,13 @@
 <body>
     <div class="entire-wrapper">
         <div th:replace="fragments/header :: header"></div>
-        <main id="content" role="main" class="two-column-accounts">
+        <div class="govuk-width-container">
             <div th:replace="fragments/betaBanner :: betaBanner"></div>
             <div th:replace="fragments/userBar :: userBar"></div>
-            <div layout:fragment="content"></div>
-        </main>
+            <main id="content" role="main" class="govuk-main-wrapper">
+                <div layout:fragment="content"></div>
+            </main>
+        </div>
     </div>
     <div th:replace="fragments/footer :: footer"></div>
     <script th:src="@{{cdnUrl}/javascripts/vendor/require.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
