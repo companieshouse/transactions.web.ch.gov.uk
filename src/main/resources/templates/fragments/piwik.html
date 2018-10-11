@@ -4,7 +4,7 @@
         <title>Piwik</title>
     </head>
     <body>
-        <div th:fragment="piwik">
+        <div th:fragment="piwik" class="govuk-visually-hidden">
             <script th:inline="javascript">
                 (function() {
                     bindPiwikListener('transactions', /*[[${@environment.getProperty('piwik.url')}]]*/, /*[[${@environment.getProperty('piwik.siteId')}]]*/);
