@@ -26,6 +26,7 @@
                 <div layout:fragment="content"></div>
             </main>
         </div>
+        <div class="push"></div>
     </div>
     <div th:replace="fragments/footer :: footer"></div>
     <script th:src="@{{cdnUrl}/javascripts/vendor/require.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
