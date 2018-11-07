@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Header</title>
+    </head>
+    <body>
+        <th:block th:fragment="header">
+            <header  role="banner" id="global-header" class="govuk-header">
+                <div class="govuk-header__container govuk-width-container">
+                    <div class="header-global">
+                        <div class="govuk-header__logo">
+                            <a href="/" title="Go to the companies house homepage" id="logo" class="govuk-header__link govuk-header__link--homepage">
+                                <span class="govuk-header__logotype-text"> Companies House </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </th:block>
+    </body>
+</html>

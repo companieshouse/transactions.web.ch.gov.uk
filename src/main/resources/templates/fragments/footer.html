@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Header</title>
+    </head>
+    <body>
+        <footer th:fragment="footer" class="group js-footer" id="footer" role="contentinfo">
+            <nav>
+                <div>
+                    <ul>
+                        <li><a id="policies-link" href="http://resources.companieshouse.gov.uk/serviceInformation.shtml">Policies</a></li>
+                        <li><a id="cookies-link" th:href="@{{chsUrl}/help/cookies(chsUrl=${@environment.getProperty('chs.url')})}">Cookies</a></li>
+                        <li><a id="contact-us-link" th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}">Contact us</a></li>
+                        <li><a id="developer-link" th:href="@{{developerUrl}/api/docs/(developerUrl=${@environment.getProperty('developer.url')})}">Developers</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </footer>
+    </body>
+</html>

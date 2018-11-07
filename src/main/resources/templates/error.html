@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}">
+
+    <head>
+        <title>Server error</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+
+            <div class="text">
+                <h1 class="heading-xlarge">Sorry we are experiencing technical difficulties</h1>
+            </div>
+
+            <p>Try again in a few moments.</p>
+            <p>
+                If this problem continues please
+                <a th:href="@{{enquiries}(enquiries=${@environment.getProperty('enquiries')})}">email us</a>
+            </p>
+          
+        </div>
+    </body>
+</html>
