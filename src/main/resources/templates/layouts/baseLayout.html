@@ -6,10 +6,10 @@
     <title layout:title-pattern="$CONTENT_TITLE"></title>
     <div id="templateName" th:attr="data-id=${templateName}" hidden></div>
     <link
-        th:href="@{{cdnUrl}/stylesheets/small-full-ch-accounts.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
+        th:href="@{{cdnUrl}/stylesheets/chs-styles.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
         media="all" rel="stylesheet" type="text/css" />
     <link
-        th:href="@{{cdnUrl}/stylesheets/small-full-ch-accounts-print.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
+        th:href="@{{cdnUrl}/stylesheets/chs-print-styles.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
         media="print" rel="stylesheet" type="text/css" />
     <link
         rel="icon"
