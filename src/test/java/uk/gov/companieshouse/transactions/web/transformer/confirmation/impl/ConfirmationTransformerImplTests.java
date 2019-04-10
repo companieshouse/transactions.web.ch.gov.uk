@@ -34,7 +34,7 @@ public class ConfirmationTransformerImplTests {
 
     private static final String EXPECTED_CONFIRMATION_CLOSED_DATE = "1 July 2018";
 
-    private static final String EXPECTED_CONFIRMATION_CLOSED_TIME = "12:34 PM";
+    private static final String EXPECTED_CONFIRMATION_CLOSED_TIME = "12:34pm";
 
     private static final String TRANSACTION_ID = "transactionId";
 

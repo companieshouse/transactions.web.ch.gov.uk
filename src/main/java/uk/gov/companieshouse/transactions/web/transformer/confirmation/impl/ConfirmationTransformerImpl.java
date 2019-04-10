@@ -16,7 +16,7 @@ public class ConfirmationTransformerImpl implements ConfirmationTransformer {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("h:mm a");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("h:mma");
 
     private static final String EMAIL_KEY = "email";
 
@@ -39,7 +39,7 @@ public class ConfirmationTransformerImpl implements ConfirmationTransformer {
         LocalDateTime closedAt = LocalDateTime.ofInstant(closedInstant, ZoneOffset.UTC);
 
         confirmation.setClosedAtDate(closedAt.format(DATE_FORMATTER));
-        confirmation.setClosedAtTime(closedAt.format(TIME_FORMATTER));
+        confirmation.setClosedAtTime(closedAt.format(TIME_FORMATTER).toLowerCase());
         confirmation.setTransactionId(transaction.getId());
         confirmation.setClosedBy(transaction.getClosedBy().get(EMAIL_KEY));
 
