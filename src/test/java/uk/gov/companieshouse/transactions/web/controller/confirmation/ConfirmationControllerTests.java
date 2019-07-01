@@ -68,7 +68,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
 
-        when(transactionsService.isTransactionClosed(closedTransaction)).thenReturn(true);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
 
         when(confirmationService.getTransactionConfirmation(closedTransaction))
                 .thenReturn(new Confirmation());
@@ -88,7 +88,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(openTransaction);
 
-        when(transactionsService.isTransactionClosed(openTransaction)).thenReturn(false);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(openTransaction)).thenReturn(false);
 
         this.mockMvc.perform(get(CONFIRMATION_PATH))
                 .andExpect(view().name(ERROR_VIEW))
@@ -120,7 +120,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
 
-        when(transactionsService.isTransactionClosed(closedTransaction)).thenReturn(true);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
 
         when(confirmationService.getTransactionConfirmation(closedTransaction)).thenThrow(ServiceException.class);
 

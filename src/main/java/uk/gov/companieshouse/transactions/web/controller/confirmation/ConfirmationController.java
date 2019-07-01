@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmation;
 
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +14,8 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.service.confirmation.ConfirmationService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/transaction/{transactionId}/confirmation")
@@ -39,7 +40,7 @@ public class ConfirmationController {
         try {
             Transaction transaction = transactionsService.getTransaction(transactionId);
 
-            if (!transactionsService.isTransactionClosed(transaction)) {
+            if (!transactionsService.isTransactionClosedOrClosedPendingPayment(transaction)) {
                 LOGGER.errorRequest(request, "Transaction " + transactionId + " has not been closed");
                 return ERROR_PAGE;
             }

@@ -28,9 +28,9 @@
 
     <java-session-handler.version>2.0.0-rc4</java-session-handler.version>
 
-    <api-sdk-java.version>2.0.1-rc3</api-sdk-java.version>
+    <api-sdk-java.version>4.1.5</api-sdk-java.version>
 
-    <sdk-manager-java.version>1.0.0-rc1</sdk-manager-java.version>
+    <sdk-manager-java.version>1.4.1-rc1</sdk-manager-java.version>
 
     <lombok.version>1.18.0</lombok.version>
 
