@@ -14,9 +14,9 @@ public interface TransactionsService {
     Transaction getTransaction(String transactionId) throws ServiceException;
 
     /**
-     * Determines whether a transaction's status is 'closed'
+     * Determines whether a transaction's status is 'closed' or 'closed pending payment'
      * @param transaction
-     * @return true is a transaction is closed
+     * @return true if a transaction is closed or closed pending payment
      */
-    boolean isTransactionClosed(Transaction transaction);
+    boolean isTransactionClosedOrClosedPendingPayment(Transaction transaction);
 }
