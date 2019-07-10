@@ -54,7 +54,7 @@ public class ConfirmationController {
             String sessionPaymentState = (String) sessionData.get(PAYMENT_STATE);
             sessionData.remove(PAYMENT_STATE);
 
-            if (!sessionPaymentState.equals(paymentState.get())) {
+            if (!paymentState.get().equals(sessionPaymentState)) {
 
                 LOGGER.errorRequest(request, "Payment state appears to have been tampered! "
                         + "Expected: " + sessionPaymentState + ", Received: " + paymentState.get());
