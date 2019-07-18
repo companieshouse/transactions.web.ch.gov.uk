@@ -81,6 +81,19 @@ public class ConfirmationControllerTests {
     }
 
     @Test
+    @DisplayName("Get confirmation view - Payment Cancelled Path")
+    void getPaymentCancelled() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+        .param("status", "cancelled"))
+            .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
     @DisplayName("Get confirmation view - transaction open")
     void getConfirmationForOpenTransaction() throws Exception {
 
