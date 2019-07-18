@@ -94,6 +94,27 @@ public class ConfirmationControllerTests {
     }
 
     @Test
+    @DisplayName("Get confirmation view - Payment Not Cancelled Path")
+    void getPaymentNotCancelled() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
+
+        when(confirmationService.getTransactionConfirmation(closedTransaction))
+            .thenReturn(new Confirmation());
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+            .param("status", "closed"))
+            .andExpect(view().name(CONFIRMATION_VIEW))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
+            .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
+    }
+
+    @Test
     @DisplayName("Get confirmation view - transaction open")
     void getConfirmationForOpenTransaction() throws Exception {
 
