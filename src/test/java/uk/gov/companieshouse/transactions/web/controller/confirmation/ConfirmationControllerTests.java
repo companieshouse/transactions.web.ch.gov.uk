@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.confirmation.Confirmation;
@@ -87,10 +88,12 @@ public class ConfirmationControllerTests {
         Transaction closedTransaction = new Transaction();
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+        String journeyUrl = UrlBasedViewResolver.REDIRECT_URL_PREFIX+closedTransaction.getResumeJourneyUri();
 
         this.mockMvc.perform(get(CONFIRMATION_PATH)
         .param("status", "cancelled"))
-            .andExpect(status().is3xxRedirection());
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name(journeyUrl));
     }
 
     @Test
@@ -107,7 +110,7 @@ public class ConfirmationControllerTests {
             .thenReturn(new Confirmation());
 
         this.mockMvc.perform(get(CONFIRMATION_PATH)
-            .param("status", "closed"))
+            .param("status", "paid"))
             .andExpect(view().name(CONFIRMATION_VIEW))
             .andExpect(status().isOk())
             .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
