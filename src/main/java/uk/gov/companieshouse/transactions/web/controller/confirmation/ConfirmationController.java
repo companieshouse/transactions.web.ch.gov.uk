@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmation;
 
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,7 @@ import uk.gov.companieshouse.transactions.web.service.confirmation.ConfirmationS
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 
 import javax.servlet.http.HttpServletRequest;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @Controller
 @RequestMapping("/transaction/{transactionId}/confirmation")
@@ -29,17 +31,38 @@ public class ConfirmationController {
 
     private static final String ERROR_PAGE = "error";
 
+    private static final String PAYMENT_STATE = "payment_state";
+
     @Autowired
     private TransactionsService transactionsService;
 
     @Autowired
     private ConfirmationService confirmationService;
 
+    @Autowired
+    private SessionService sessionService;
+
     @GetMapping
     public String getConfirmation(@PathVariable String transactionId,
-                                  HttpServletRequest request,
+                                  @RequestParam("state") Optional<String> paymentState,
                                   @RequestParam("status") Optional<String> paymentStatus,
+                                  HttpServletRequest request,
                                   Model model) {
+
+        if (paymentState.isPresent()) {
+
+            Map<String, Object> sessionData = sessionService.getSessionDataFromContext();
+
+            String sessionPaymentState = (String) sessionData.get(PAYMENT_STATE);
+            sessionData.remove(PAYMENT_STATE);
+
+            if (!paymentState.get().equals(sessionPaymentState)) {
+
+                LOGGER.errorRequest(request, "Payment state appears to have been tampered! "
+                        + "Expected: " + sessionPaymentState + ", Received: " + paymentState.get());
+                return ERROR_PAGE;
+            }
+        }
 
         try {
             Transaction transaction = transactionsService.getTransaction(transactionId);
