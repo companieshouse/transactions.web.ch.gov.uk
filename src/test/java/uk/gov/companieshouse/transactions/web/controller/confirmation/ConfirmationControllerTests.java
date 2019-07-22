@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.confirmation.Confirmation;
 import uk.gov.companieshouse.transactions.web.service.confirmation.ConfirmationService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,13 +40,26 @@ public class ConfirmationControllerTests {
     @Mock
     private ConfirmationService confirmationService;
 
+    @Mock
+    private SessionService sessionService;
+
+    @Mock
+    private Map<String, Object> sessionData;
+
     @InjectMocks
     private ConfirmationController controller;
 
     private static final String TRANSACTION_ID = "transactionId";
 
-    private static final String CONFIRMATION_PATH = "/transaction/" + TRANSACTION_ID +
+    private static final String CONFIRMATION_PATH_WITHOUT_STATE_PARAM = "/transaction/" + TRANSACTION_ID +
                                                         "/confirmation";
+
+    private static final String CONFIRMATION_PATH_WITH_STATE_PARAM = "/transaction/" + TRANSACTION_ID +
+                                                        "/confirmation?state={state}";
+
+    private static final String STATE = "state";
+
+    private static final String MISMATCHED_STATE = "mismatchedState";
 
     private static final String CONFIRMATION_VIEW = "transactionConfirmation";
 
@@ -54,6 +69,8 @@ public class ConfirmationControllerTests {
 
     private static final String ERROR_VIEW = "error";
 
+    private static final String PAYMENT_STATE = "payment_state";
+
     @BeforeEach
     private void setup() {
 
@@ -61,8 +78,12 @@ public class ConfirmationControllerTests {
     }
 
     @Test
-    @DisplayName("Get confirmation view - success path")
-    void getConfirmationSuccess() throws Exception {
+    @DisplayName("Get confirmation view - success path with state parameter")
+    void getConfirmationSuccessWithStateParam() throws Exception {
+
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+
+        when(sessionData.get(PAYMENT_STATE)).thenReturn(STATE);
 
         Transaction closedTransaction = new Transaction();
 
@@ -73,11 +94,50 @@ public class ConfirmationControllerTests {
         when(confirmationService.getTransactionConfirmation(closedTransaction))
                 .thenReturn(new Confirmation());
 
-        this.mockMvc.perform(get(CONFIRMATION_PATH))
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITH_STATE_PARAM, STATE))
                 .andExpect(view().name(CONFIRMATION_VIEW))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
                 .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
+
+        verify(sessionData).remove(PAYMENT_STATE);
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - mismatched state parameter")
+    void getConfirmationWithMismatchedStateParam() throws Exception {
+
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+
+        when(sessionData.get(PAYMENT_STATE)).thenReturn(MISMATCHED_STATE);
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITH_STATE_PARAM, STATE))
+                .andExpect(view().name(ERROR_VIEW))
+                .andExpect(status().isOk());
+
+        verify(sessionData).remove(PAYMENT_STATE);
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - success path without state parameter")
+    void getConfirmationSuccessWithoutStateParam() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
+
+        when(confirmationService.getTransactionConfirmation(closedTransaction))
+                .thenReturn(new Confirmation());
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITHOUT_STATE_PARAM))
+                .andExpect(view().name(CONFIRMATION_VIEW))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
+                .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
+
+        verify(sessionService, never()).getSessionDataFromContext();
     }
 
     @Test
@@ -90,7 +150,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.isTransactionClosedOrClosedPendingPayment(openTransaction)).thenReturn(false);
 
-        this.mockMvc.perform(get(CONFIRMATION_PATH))
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITHOUT_STATE_PARAM))
                 .andExpect(view().name(ERROR_VIEW))
                 .andExpect(status().isOk());
 
@@ -103,7 +163,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenThrow(ServiceException.class);
 
-        this.mockMvc.perform(get(CONFIRMATION_PATH))
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITHOUT_STATE_PARAM))
                 .andExpect(view().name(ERROR_VIEW))
                 .andExpect(status().isOk());
 
@@ -124,7 +184,7 @@ public class ConfirmationControllerTests {
 
         when(confirmationService.getTransactionConfirmation(closedTransaction)).thenThrow(ServiceException.class);
 
-        this.mockMvc.perform(get(CONFIRMATION_PATH))
+        this.mockMvc.perform(get(CONFIRMATION_PATH_WITHOUT_STATE_PARAM))
                 .andExpect(view().name(ERROR_VIEW))
                 .andExpect(status().isOk());
 
