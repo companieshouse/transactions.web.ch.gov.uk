@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -44,6 +45,7 @@ public class ConfirmationController {
     @GetMapping
     public String getConfirmation(@PathVariable String transactionId,
                                   @RequestParam("state") Optional<String> paymentState,
+                                  @RequestParam("status") Optional<String> paymentStatus,
                                   HttpServletRequest request,
                                   Model model) {
 
@@ -64,6 +66,11 @@ public class ConfirmationController {
 
         try {
             Transaction transaction = transactionsService.getTransaction(transactionId);
+
+            if (paymentStatus.isPresent() && paymentStatus.get().equals("cancelled")) {
+
+                return UrlBasedViewResolver.REDIRECT_URL_PREFIX + transaction.getResumeJourneyUri();
+            }
 
             if (!transactionsService.isTransactionClosedOrClosedPendingPayment(transaction)) {
                 LOGGER.errorRequest(request, "Transaction " + transactionId + " has not been closed");
