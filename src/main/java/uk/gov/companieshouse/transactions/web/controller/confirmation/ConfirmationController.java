@@ -71,6 +71,10 @@ public class ConfirmationController {
 
                 return UrlBasedViewResolver.REDIRECT_URL_PREFIX + transaction.getResumeJourneyUri();
             }
+            if (paymentStatus.isPresent() && paymentStatus.get().equals("failed")) {
+
+                return UrlBasedViewResolver.REDIRECT_URL_PREFIX + transaction.getResumeJourneyUri();
+            }
 
             if (!transactionsService.isTransactionClosedOrClosedPendingPayment(transaction)) {
                 LOGGER.errorRequest(request, "Transaction " + transactionId + " has not been closed");
