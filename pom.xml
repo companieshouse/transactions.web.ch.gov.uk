@@ -28,13 +28,11 @@
 
     <java-session-handler.version>2.0.0-rc4</java-session-handler.version>
 
-    <api-sdk-java.version>2.0.1-rc3</api-sdk-java.version>
+    <api-sdk-java.version>4.1.6</api-sdk-java.version>
 
-    <sdk-manager-java.version>1.0.0-rc1</sdk-manager-java.version>
+    <sdk-manager-java.version>1.4.1-rc1</sdk-manager-java.version>
 
-    <lombok.version>1.18.0</lombok.version>
-
-    <spring-security-core.version>5.0.7.RELEASE</spring-security-core.version>
+    <spring-security-core.version>5.0.12.RELEASE</spring-security-core.version>
 
     <structured-logging.version>1.5.0-rc2</structured-logging.version>
 
@@ -107,13 +105,6 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>sdk-manager-java</artifactId>
       <version>${sdk-manager-java.version}</version>
-    </dependency>
-
-    <!-- Lombok -->
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
     </dependency>
 
     <!-- Security dependencies -->

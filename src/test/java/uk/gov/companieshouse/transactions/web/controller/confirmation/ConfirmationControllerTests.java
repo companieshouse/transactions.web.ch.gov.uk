@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,11 +21,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.confirmation.Confirmation;
 import uk.gov.companieshouse.transactions.web.service.confirmation.ConfirmationService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,6 +41,12 @@ public class ConfirmationControllerTests {
     @Mock
     private ConfirmationService confirmationService;
 
+    @Mock
+    private SessionService sessionService;
+
+    @Mock
+    private Map<String, Object> sessionData;
+
     @InjectMocks
     private ConfirmationController controller;
 
@@ -45,6 +54,10 @@ public class ConfirmationControllerTests {
 
     private static final String CONFIRMATION_PATH = "/transaction/" + TRANSACTION_ID +
                                                         "/confirmation";
+
+    private static final String STATE = "state";
+
+    private static final String MISMATCHED_STATE = "mismatchedState";
 
     private static final String CONFIRMATION_VIEW = "transactionConfirmation";
 
@@ -54,6 +67,8 @@ public class ConfirmationControllerTests {
 
     private static final String ERROR_VIEW = "error";
 
+    private static final String PAYMENT_STATE = "payment_state";
+
     @BeforeEach
     private void setup() {
 
@@ -61,14 +76,57 @@ public class ConfirmationControllerTests {
     }
 
     @Test
-    @DisplayName("Get confirmation view - success path")
-    void getConfirmationSuccess() throws Exception {
+    @DisplayName("Get confirmation view - success path with state parameter")
+    void getConfirmationSuccessWithStateParam() throws Exception {
+
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+
+        when(sessionData.get(PAYMENT_STATE)).thenReturn(STATE);
 
         Transaction closedTransaction = new Transaction();
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
 
-        when(transactionsService.isTransactionClosed(closedTransaction)).thenReturn(true);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
+
+        when(confirmationService.getTransactionConfirmation(closedTransaction))
+                .thenReturn(new Confirmation());
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+        .param("state", STATE))
+                .andExpect(view().name(CONFIRMATION_VIEW))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
+                .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
+
+        verify(sessionData).remove(PAYMENT_STATE);
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - mismatched state parameter")
+    void getConfirmationWithMismatchedStateParam() throws Exception {
+
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+
+        when(sessionData.get(PAYMENT_STATE)).thenReturn(MISMATCHED_STATE);
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+        .param("state", "mismatchedState"))
+                .andExpect(view().name(ERROR_VIEW))
+                .andExpect(status().isOk());
+
+        verify(sessionData).remove(PAYMENT_STATE);
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - success path without state parameter")
+    void getConfirmationSuccessWithoutStateParam() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
 
         when(confirmationService.getTransactionConfirmation(closedTransaction))
                 .thenReturn(new Confirmation());
@@ -78,6 +136,44 @@ public class ConfirmationControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
                 .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
+
+        verify(sessionService, never()).getSessionDataFromContext();
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - Payment Cancelled Path")
+    void getPaymentCancelled() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+        String journeyUrl = UrlBasedViewResolver.REDIRECT_URL_PREFIX+closedTransaction.getResumeJourneyUri();
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+        .param("status", "cancelled"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name(journeyUrl));
+    }
+
+    @Test
+    @DisplayName("Get confirmation view - Payment Not Cancelled Path")
+    void getPaymentNotCancelled() throws Exception {
+
+        Transaction closedTransaction = new Transaction();
+
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
+
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
+
+        when(confirmationService.getTransactionConfirmation(closedTransaction))
+            .thenReturn(new Confirmation());
+
+        this.mockMvc.perform(get(CONFIRMATION_PATH)
+            .param("status", "paid"))
+            .andExpect(view().name(CONFIRMATION_VIEW))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists(CONFIRMATION_MODEL_ATTR))
+            .andExpect(model().attributeExists(TEMPLATE_NAME_ATTR));
     }
 
     @Test
@@ -88,7 +184,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(openTransaction);
 
-        when(transactionsService.isTransactionClosed(openTransaction)).thenReturn(false);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(openTransaction)).thenReturn(false);
 
         this.mockMvc.perform(get(CONFIRMATION_PATH))
                 .andExpect(view().name(ERROR_VIEW))
@@ -120,7 +216,7 @@ public class ConfirmationControllerTests {
 
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(closedTransaction);
 
-        when(transactionsService.isTransactionClosed(closedTransaction)).thenReturn(true);
+        when(transactionsService.isTransactionClosedOrClosedPendingPayment(closedTransaction)).thenReturn(true);
 
         when(confirmationService.getTransactionConfirmation(closedTransaction)).thenThrow(ServiceException.class);
 
