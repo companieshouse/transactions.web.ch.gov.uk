@@ -13,10 +13,9 @@
   <description>Web service to handle transaction data</description>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.0.5.RELEASE</version>
-    <relativePath/>
+    <groupId>uk.gov.companieshouse</groupId>
+    <artifactId>companies-house-spring-boot-parent</artifactId>
+    <version>1.2.0</version>
   </parent>
 
   <properties>

@@ -27,9 +27,7 @@ test-unit: clean
 
 .PHONY: package
 package:
-ifndef version
-	$(error No version given. Aborting)
-endif
+	@test -s ./$(artifact_name).jar || { echo "ERROR: Service JAR not found"; exit 1; }
 	$(info Packaging version: $(version))
 	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	mvn package -DskipTests=true
