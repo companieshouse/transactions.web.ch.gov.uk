@@ -8,8 +8,8 @@ import uk.gov.companieshouse.transactions.web.exception.UnsupportedTransactionCo
  */
 public enum ConfirmationDescription {
 
-    FULL_ACCOUNTS("Small Full Accounts", "Full accounts"),
-    CIC_REPORT_AND_SMALL_FULL_ACCOUNTS("CIC Report and Small Full Accounts", "CIC report and accounts");
+    FULL_ACCOUNTS("Full accounts", "Full accounts"),
+    CIC_REPORT_AND_SMALL_FULL_ACCOUNTS("CIC report and full Accounts", "CIC report and accounts");
 
     private String transactionDescription;
     private String confirmationDescription;

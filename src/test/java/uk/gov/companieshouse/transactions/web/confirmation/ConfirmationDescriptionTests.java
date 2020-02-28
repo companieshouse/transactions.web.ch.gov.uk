@@ -18,7 +18,7 @@ public class ConfirmationDescriptionTests {
     @DisplayName("Get Confirmation Description - Valid Transaction Description")
     void getConfirmationDescriptionSuccess() throws UnsupportedTransactionConfirmationException {
 
-        String validTransactionDescription = "Small Full Accounts";
+        String validTransactionDescription = "Full accounts";
 
         String expectedConfirmationDesction = "Full accounts";
 

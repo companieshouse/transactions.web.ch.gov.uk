@@ -24,7 +24,7 @@ public class ConfirmationTransformerImplTests {
 
     private static final String COMPANY_NUMBER = "companyNumber";
 
-    private static final String VALID_TRANSACTION_DESCRIPTION = "Small Full Accounts";
+    private static final String VALID_TRANSACTION_DESCRIPTION = "Full accounts";
 
     private static final String EXPECTED_CONFIRMATION_DESCRIPTION = "Full accounts";
 
