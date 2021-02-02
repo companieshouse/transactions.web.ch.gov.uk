@@ -40,9 +40,7 @@
 
     <java-session-handler.version>2.0.0-rc4</java-session-handler.version>
 
-    <api-sdk-java.version>4.1.6</api-sdk-java.version>
-
-    <sdk-manager-java.version>1.4.1-rc1</sdk-manager-java.version>
+    <sdk-manager-java.version>1.5.15</sdk-manager-java.version>
 
     <spring-security-core.version>5.2.5.RELEASE</spring-security-core.version>
 
@@ -106,12 +104,6 @@
     </dependency>
 
     <!-- SDK Dependencies -->
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>api-sdk-java</artifactId>
-      <version>${api-sdk-java.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>sdk-manager-java</artifactId>
