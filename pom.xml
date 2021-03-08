@@ -56,6 +56,8 @@
 
     <mockito-junit-jupiter.version>2.18.0</mockito-junit-jupiter.version>
 
+    <common-web-java.version>1.5.0</common-web-java.version>
+
     <!-- Build Properties -->
 
     <!-- Maven and Surefire plugins -->
@@ -63,15 +65,6 @@
     <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
     <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
     <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
-
-    <!-- Sonar -->
-    <sonar-maven-plugin.version>3.4.0.905</sonar-maven-plugin.version>
-    <sonar.host.url>${CODE_ANALYSIS_HOST_URL}</sonar.host.url>
-    <sonar.login>${CODE_ANALYSIS_LOGIN}</sonar.login>
-    <sonar.password>${CODE_ANALYSIS_PASSWORD}</sonar.password>
-
-    <!-- Jacoco -->
-    <jacoco-maven-plugin.version>0.7.7.201606060606</jacoco-maven-plugin.version>
 
     <!-- Repositories -->
     <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
@@ -83,6 +76,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>common-web-java</artifactId>
+      <version>${common-web-java.version}</version>
     </dependency>
 
     <!-- Thymeleaf Dependencies -->
@@ -169,6 +168,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot-maven-plugin.version}</version>
         <configuration>
           <mainClass>uk.gov.companieshouse.transactions.web.TransactionsWebApplication</mainClass>
           <layout>ZIP</layout>
