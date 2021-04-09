@@ -222,6 +222,16 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>2.7.0</version>
+        <configuration>
+          <container>
+            <expandClasspathDependencies>true</expandClasspathDependencies>
+          </container>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
