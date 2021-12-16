@@ -20,6 +20,14 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j-bom.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+    </dependency>
+
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-dependencies.version}</version>
@@ -44,7 +52,9 @@
 
     <spring-security-core.version>5.5.2</spring-security-core.version>
 
-    <structured-logging.version>1.5.0-rc2</structured-logging.version>
+    <structured-logging.version>1.9.11</structured-logging.version>
+
+    <log4j-bom.version>2.16.0</log4j-bom.version>
 
     <hamcrest.version>2.2</hamcrest.version>
 
@@ -57,6 +67,8 @@
     <mockito-junit-jupiter.version>3.9.0</mockito-junit-jupiter.version>
 
     <common-web-java.version>1.5.0</common-web-java.version>
+
+    <json.version>20211205</json.version>
 
     <!-- Build Properties -->
 
@@ -73,6 +85,12 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>${json.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
