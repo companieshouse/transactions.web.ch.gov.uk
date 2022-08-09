@@ -78,7 +78,7 @@
 
         <p class="govuk-body">
           <span id="confirmation-feedback">This is a new service. Help us improve it by
-            <a id="confirmation-feedback-link" href="https://www.research.net/r/chfiling" target="_blank">completing our quick survey</a>.
+            <a id="confirmation-feedback-link" th:href="${@environment.getProperty('feedback.url')}" target="_blank">completing our quick survey</a>.
           </span>
         </p>
 
