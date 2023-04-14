@@ -68,7 +68,7 @@
 
     <common-web-java.version>1.5.0</common-web-java.version>
 
-    <json.version>20211205</json.version>
+    <json.version>20230227</json.version>
 
     <!-- Build Properties -->
 
