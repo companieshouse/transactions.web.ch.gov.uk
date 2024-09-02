@@ -3,7 +3,7 @@ locals {
   stack_name                  = "filing-core" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
-  service_name                = "transactions.web.ch.gov.uk"
+  service_name                = "transactions-web"
   container_port              = "8080"
   docker_repo                 = "transactions.web.ch.gov.uk"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
