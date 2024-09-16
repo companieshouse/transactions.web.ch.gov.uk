@@ -14,8 +14,43 @@
   <parent>
     <groupId>uk.gov.companieshouse</groupId>
     <artifactId>companies-house-parent</artifactId>
-    <version>1.3.0</version>
+    <version>2.1.6</version>
   </parent>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>21</java.version>
+    <spring-boot-dependencies.version>3.3.3</spring-boot-dependencies.version>
+    <spring-boot-maven-plugin.version>3.3.3</spring-boot-maven-plugin.version>
+    <thymeleaf-layout-dialect.version>3.3.0</thymeleaf-layout-dialect.version>
+    <!--<spring-security-core.version>6.6.3</spring-security-core.version>-->
+    <log4j-bom.version>2.24.0</log4j-bom.version>
+    <hamcrest.version>3.0</hamcrest.version>
+    <spring-test.version>6.1.12</spring-test.version>
+    <junit-jupiter-engine.version>5.11.0</junit-jupiter-engine.version>
+    <mockito-junit-jupiter.version>5.13.0</mockito-junit-jupiter.version>
+    <json.version>20240303</json.version>
+
+    <!-- Internal Dependencies -->
+    <common-web-java.version>3.0.9</common-web-java.version>
+    <java-session-handler.version>4.1.0</java-session-handler.version>
+    <sdk-manager-java.version>3.0.9</sdk-manager-java.version>
+    <structured-logging.version>3.0.9</structured-logging.version>
+
+    <!-- Build Properties -->
+
+    <!-- Maven and Surefire plugins -->
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
+    <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
+
+    <!-- Repositories -->
+    <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
+    <artifactoryResolveReleaseRepo>libs-release-local</artifactoryResolveReleaseRepo>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -25,7 +60,7 @@
         <version>${log4j-bom.version}</version>
         <scope>import</scope>
         <type>pom</type>
-    </dependency>
+      </dependency>
 
       <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -36,53 +71,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-
-    <spring-boot-dependencies.version>2.5.5</spring-boot-dependencies.version>
-    <spring-boot-maven-plugin.version>2.5.5</spring-boot-maven-plugin.version>
-    <thymeleaf-layout-dialect.version>2.5.3</thymeleaf-layout-dialect.version>
-
-    <java-session-handler.version>2.0.0-rc4</java-session-handler.version>
-
-    <sdk-manager-java.version>1.5.15</sdk-manager-java.version>
-
-    <spring-security-core.version>5.5.2</spring-security-core.version>
-
-    <structured-logging.version>1.9.11</structured-logging.version>
-
-    <log4j-bom.version>2.16.0</log4j-bom.version>
-
-    <hamcrest.version>2.2</hamcrest.version>
-
-    <hamcrest-library-version>2.2</hamcrest-library-version>
-
-    <spring-test.version>5.3.10</spring-test.version>
-
-    <junit-jupiter-engine.version>5.7.2</junit-jupiter-engine.version>
-
-    <mockito-junit-jupiter.version>3.9.0</mockito-junit-jupiter.version>
-
-    <common-web-java.version>1.5.0</common-web-java.version>
-
-    <json.version>20211205</json.version>
-
-    <!-- Build Properties -->
-
-    <!-- Maven and Surefire plugins -->
-    <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
-    <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
-
-    <!-- Repositories -->
-    <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
-    <artifactoryResolveReleaseRepo>libs-release-local</artifactoryResolveReleaseRepo>
-
-  </properties>
 
   <dependencies>
     <dependency>
@@ -111,6 +99,7 @@
     <dependency>
       <groupId>nz.net.ultraq.thymeleaf</groupId>
       <artifactId>thymeleaf-layout-dialect</artifactId>
+      <version>${thymeleaf-layout-dialect.version}</version>
     </dependency>
 
     <!-- Session Handler -->
@@ -153,30 +142,27 @@
     <!-- Test Dependencies -->
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-library</artifactId>
-      <scope>test</scope>
+      <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
+      <version>${spring-test.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito-junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -199,6 +185,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -210,8 +197,12 @@
           <meminitial>128m</meminitial>
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmem>512m</maxmem>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -224,30 +215,33 @@
           </archive>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${junit-platform-surefire-provider.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
+
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
-        <version>3.1.4</version>
+        <version>${jib-maven-plugin.version}</version>
         <configuration>
           <container>
             <expandClasspathDependencies>true</expandClasspathDependencies>
           </container>
+          <from>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21:latest</image>
+          </from>
+          <to>
+            //Once the pipeline is moved to shared services need to update this to image reference from shared services
+            <image>169942020521.dkr.ecr.eu-west-2.amazonaws.com/transactions.web.ch.gov.uk:latest</image>
+          </to>
         </configuration>
       </plugin>
     </plugins>
