@@ -20,12 +20,12 @@ public class ConfirmationDescriptionTests {
 
         String validTransactionDescription = "Full accounts";
 
-        String expectedConfirmationDesction = "Full accounts";
+        String expectedConfirmationDescription = "Full accounts";
 
         String confirmationDescription =
                 ConfirmationDescription.getConfirmationDescription(validTransactionDescription);
 
-        assertEquals(expectedConfirmationDesction, confirmationDescription);
+        assertEquals(expectedConfirmationDescription, confirmationDescription);
     }
 
     @Test

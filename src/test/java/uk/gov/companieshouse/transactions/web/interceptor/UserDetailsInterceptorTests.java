@@ -9,9 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,9 +41,6 @@ public class UserDetailsInterceptorTests {
     private HttpServletResponse httpServletResponse;
 
     @Mock
-    private HttpSession session;
-
-    @Mock
     private ModelAndView modelAndView;
 
     @Mock
@@ -70,7 +66,7 @@ public class UserDetailsInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor adds the user email to the model for GET requests")
-    void postHandleForGetRequestSuccess() throws Exception {
+    void postHandleForGetRequestSuccess() {
 
         when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.GET.toString());
@@ -82,7 +78,7 @@ public class UserDetailsInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor adds the user email to the model for POST requests which don't redirect")
-    void postHandleForPostRequestError() throws Exception {
+    void postHandleForPostRequestError() {
 
         when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.toString());
@@ -95,7 +91,7 @@ public class UserDetailsInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor does not add the user email to the model for POST requests")
-    void postHandleForPostRequestIgnored() throws Exception {
+    void postHandleForPostRequestIgnored() {
 
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(modelAndView.getViewName()).thenReturn(UrlBasedViewResolver.REDIRECT_URL_PREFIX + "abc");
@@ -107,7 +103,7 @@ public class UserDetailsInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor does not add the user email to the model if no sign in info is available")
-    void postHandleForGetRequestWithoutSignInInfoIgnored() throws Exception {
+    void postHandleForGetRequestWithoutSignInInfoIgnored() {
 
         when(sessionService.getSessionDataFromContext()).thenReturn(new HashMap<>());
         when(httpServletRequest.getMethod()).thenReturn(HttpMethod.GET.toString());
