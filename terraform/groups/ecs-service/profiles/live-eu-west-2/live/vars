@@ -2,4 +2,9 @@ environment = "live"
 aws_profile = "live-eu-west-2"
 
 # service configs
-use_set_environment_files = false
+use_set_environment_files = true
+
+# scaling configs
+min_task_count = 2
+desired_task_count = 2
+max_task_count = 3
