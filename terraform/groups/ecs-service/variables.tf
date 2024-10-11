@@ -114,7 +114,7 @@ variable "use_set_environment_files" {
   description = "Toggle default global and shared  environment files"
 }
 
-variable "transactions_web_ch_gov_uk_version" {
+variable "transactions_web_version" {
   type        = string
   description = "The version of the transactions.web.ch.gov.uk service container to run."
 }

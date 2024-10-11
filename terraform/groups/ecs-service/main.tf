@@ -42,7 +42,7 @@ module "ecs-service" {
   # Docker container details
   docker_registry   = var.docker_registry
   docker_repo       = local.docker_repo
-  container_version = var.transactions_web_ch_gov_uk_version
+  container_version = var.transactions_version
   container_port    = local.container_port
 
   # Service configuration
