@@ -1,21 +1,23 @@
 package uk.gov.companieshouse.transactions.web.interceptor;
 
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @Component
-public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
+public class UserDetailsInterceptor implements HandlerInterceptor {
 
     private static final String USER_EMAIL = "userEmail";
-
     private static final String SIGN_IN_KEY = "signin_info";
     private static final String USER_PROFILE_KEY = "user_profile";
     private static final String EMAIL_KEY = "email";
@@ -24,7 +26,8 @@ public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
     private SessionService sessionService;
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                           @NonNull Object handler, @Nullable ModelAndView modelAndView) {
 
         if (modelAndView != null && shouldAttributeBeAdded(request, modelAndView)) {
 
@@ -49,6 +52,6 @@ public class UserDetailsInterceptor extends HandlerInterceptorAdapter {
     private boolean shouldAttributeBeAdded(HttpServletRequest request, ModelAndView modelAndView) {
         return (request.getMethod().equalsIgnoreCase("GET") ||
                (request.getMethod().equalsIgnoreCase("POST") &&
-                !modelAndView.getViewName().startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)));
+                !Objects.requireNonNull(modelAndView.getViewName()).startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)));
     }
 }

@@ -11,8 +11,8 @@ public enum ConfirmationDescription {
     FULL_ACCOUNTS("Full accounts", "Full accounts"),
     CIC_REPORT_AND_SMALL_FULL_ACCOUNTS("CIC report and full Accounts", "CIC report and accounts");
 
-    private String transactionDescription;
-    private String confirmationDescription;
+    private final String transactionDescription;
+    private final String confirmationDescription;
 
     ConfirmationDescription(String transactionDescription, String confirmationDescription) {
         this.transactionDescription = transactionDescription;

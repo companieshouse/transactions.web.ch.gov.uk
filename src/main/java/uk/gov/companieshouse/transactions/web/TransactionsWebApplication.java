@@ -13,8 +13,8 @@ public class TransactionsWebApplication implements WebMvcConfigurer {
 
 	public static final String APPLICATION_NAME_SPACE = "transaction.web.ch.gov.uk";
 
-	private UserDetailsInterceptor userDetailsInterceptor;
-	private LoggingInterceptor loggingInterceptor;
+	private final UserDetailsInterceptor userDetailsInterceptor;
+	private final LoggingInterceptor loggingInterceptor;
 
 	@Autowired
 	public TransactionsWebApplication(UserDetailsInterceptor userDetailsInterceptor,
