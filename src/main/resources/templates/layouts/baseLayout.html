@@ -27,19 +27,19 @@
 
 <a href="#confirmation-main-content" class="govuk-skip-link">Skip to main content</a>
 
-<div th:replace="fragments/piwikWithCookieCheck :: cookieBanner"></div>
+<div th:replace="~{fragments/piwikWithCookieCheck :: cookieBanner}"></div>
     <div class="entire-wrapper">
-        <div th:replace="fragments/header :: header"></div>
+        <div th:replace="~{fragments/header :: header}"></div>
         <div class="govuk-width-container">
-            <div th:replace="fragments/betaBanner :: betaBanner"></div>
-            <div th:replace="fragments/userBar :: userBar"></div>
+            <div th:replace="~{fragments/betaBanner :: betaBanner}"></div>
+            <div th:replace="~{fragments/userBar :: userBar}"></div>
             <main id="content" role="main" class="govuk-main-wrapper">
                 <div layout:fragment="content"></div>
             </main>
         </div>
         <div class="push"></div>
     </div>
-    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
     <script th:src="@{{cdnUrl}/javascripts/vendor/require.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
     <script th:src="@{{cdnUrl}/javascripts/vendor/jquery-1.12.4.min.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
     <script th:src="@{{cdnUrl}/javascripts/app/js-enable.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
