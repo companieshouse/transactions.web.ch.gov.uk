@@ -62,6 +62,8 @@
         <type>pom</type>
       </dependency>
 
+      <!-- required while spring boot version pulls in spring dependencies with CVE-2024-38820 -->
+      <!-- order matters here: make sure this is placed above spring-boot-dependencies -->
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
