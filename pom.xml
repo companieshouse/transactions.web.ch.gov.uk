@@ -24,6 +24,7 @@
     <spring-boot-dependencies.version>3.3.4</spring-boot-dependencies.version>
     <spring-boot-maven-plugin.version>3.3.4</spring-boot-maven-plugin.version>
     <spring-override.version>6.1.14</spring-override.version>
+    <spring-security-web.version>6.3.4</spring-security-web.version>
     <thymeleaf-layout-dialect.version>3.3.0</thymeleaf-layout-dialect.version>
     <log4j-bom.version>2.24.0</log4j-bom.version>
     <hamcrest.version>3.0</hamcrest.version>
@@ -183,6 +184,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
+      <version>${spring-security-web.version}</version>
     </dependency>
 
     <dependency>
