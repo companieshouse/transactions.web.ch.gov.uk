@@ -195,6 +195,12 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>structured-logging</artifactId>
       <version>${structured-logging.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Test Dependencies -->
