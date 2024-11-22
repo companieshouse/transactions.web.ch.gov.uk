@@ -36,6 +36,7 @@
     <java-session-handler.version>4.1.0</java-session-handler.version>
     <sdk-manager-java.version>3.0.9</sdk-manager-java.version>
     <structured-logging.version>3.0.9</structured-logging.version>
+    <web-security-java.version>3.1.0</web-security-java.version>
 
     <!-- Build Properties -->
 
@@ -145,6 +146,12 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>web-security-java</artifactId>
+      <version>${web-security-java.version}</version>
     </dependency>
 
     <!-- Logging -->
