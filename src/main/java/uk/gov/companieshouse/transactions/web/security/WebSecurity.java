@@ -19,8 +19,7 @@ public class WebSecurity {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            return ChsCsrfMitigationHttpSecurityBuilder.configureWebCsrfMitigations(
-                    http.addFilterBefore(new SessionHandler(), BasicAuthenticationFilter.class)).build();
+            return ChsCsrfMitigationHttpSecurityBuilder.configureWebCsrfMitigations(http).build();
         }
     }
 
