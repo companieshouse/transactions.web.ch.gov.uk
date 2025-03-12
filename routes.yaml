@@ -1,5 +1,0 @@
-app_name: transactions.web.ch.gov.uk
-group: web
-weight: 910
-routes:
-   1: /transaction/(.*)/confirmation

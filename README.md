@@ -1,6 +1,14 @@
 # transactions.web.ch.gov.uk
 The Companies House web application for handling transactions
 
+### Requirements
+- [Java 21](https://www.oracle.com/java/technologies/downloads/#java21)
+- [Maven](https://maven.apache.org/download.cgi)
+- [Git](https://git-scm.com/downloads)
+
+### Getting Started
+- enable the accounts module in chs-dev: chs-dev modules enable accounts
+
 ## Terraform ECS
 
 ### What does this code do?
