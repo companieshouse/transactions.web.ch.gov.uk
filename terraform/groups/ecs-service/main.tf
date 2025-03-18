@@ -19,7 +19,7 @@ terraform {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.300"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.294"
 
   # Environmental configuration
   environment             = var.environment
@@ -28,7 +28,7 @@ module "ecs-service" {
   vpc_id                  = data.aws_vpc.vpc.id
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
-
+  read_only_root_filesystem   = false
 
   # Load balancer configuration
   lb_listener_arn                 = data.aws_lb_listener.service_lb_listener.arn
@@ -77,7 +77,7 @@ module "ecs-service" {
 
 
 module "secrets" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.300"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.294"
 
   name_prefix = "${local.service_name}-${var.environment}"
   environment = var.environment
