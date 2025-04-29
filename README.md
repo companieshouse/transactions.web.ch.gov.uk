@@ -9,6 +9,10 @@ The Companies House web application for handling transactions
 ### Getting Started
 - enable the accounts module in chs-dev: chs-dev modules enable accounts
 
+### Confluence pages
+
+[Design Page](https://companieshouse.atlassian.net/wiki/spaces/DEV/pages/529137946/Transactions+Web+Service+-+Confirmation+Design)
+
 ## Terraform ECS
 
 ### What does this code do?
