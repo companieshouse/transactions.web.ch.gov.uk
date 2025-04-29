@@ -34,7 +34,7 @@
 
     <!-- Internal Dependencies -->
     <common-web-java.version>3.0.38</common-web-java.version>
-    <java-session-handler.version>4.1.4</java-session-handler.version>
+    <java-session-handler.version>4.1.7</java-session-handler.version>
     <sdk-manager-java.version>3.0.10</sdk-manager-java.version>
     <structured-logging.version>3.0.26</structured-logging.version>
     <web-security-java.version>3.1.4</web-security-java.version>
