@@ -40,7 +40,7 @@ package:
 dist: clean build package
 
 .PHONY: sonar
-sonar:
+sonar: test
 	mvn sonar:sonar
 
 .PHONY: sonar-pr-analysis
