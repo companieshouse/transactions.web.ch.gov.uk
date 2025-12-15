@@ -37,7 +37,7 @@
     <common-web-java.version>3.0.40</common-web-java.version>
     <java-session-handler.version>4.1.8</java-session-handler.version>
     <sdk-manager-java.version>3.0.14</sdk-manager-java.version>
-    <structured-logging.version>3.0.36</structured-logging.version>
+    <structured-logging.version>3.0.38</structured-logging.version>
     <web-security-java.version>3.1.6</web-security-java.version>
 
     <!-- Maven and Surefire plugins -->
@@ -81,6 +81,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-dependencies.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom</artifactId>
+        <version>2.14.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -233,6 +241,11 @@
           <artifactId>junit-vintage-engine</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-spring-boot-starter</artifactId>
     </dependency>
 
   </dependencies>
