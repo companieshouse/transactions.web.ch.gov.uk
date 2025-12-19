@@ -22,8 +22,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>21</java.version>
-    <spring-boot-dependencies.version>3.5.5</spring-boot-dependencies.version>
-    <spring-boot-maven-plugin.version>3.5.5</spring-boot-maven-plugin.version>
+    <spring-boot-dependencies.version>3.5.7</spring-boot-dependencies.version>
+    <spring-boot-maven-plugin.version>3.5.7</spring-boot-maven-plugin.version>
     <thymeleaf-layout-dialect.version>3.4.0</thymeleaf-layout-dialect.version>
     <log4j-bom.version>2.25.0</log4j-bom.version>
     <hamcrest.version>3.0</hamcrest.version>

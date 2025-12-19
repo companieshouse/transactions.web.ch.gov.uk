@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmation;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,6 +52,8 @@ public class ConfirmationController {
                                   HttpServletRequest request,
                                   Model model) {
 
+        LOGGER.infoRequest(request, "Confirmation request received for transaction id " + transactionId, new HashMap<>());
+
         if (paymentState.isPresent()) {
 
             Map<String, Object> sessionData = sessionService.getSessionDataFromContext();
@@ -82,6 +85,9 @@ public class ConfirmationController {
                 LOGGER.errorRequest(request, "Transaction " + transactionId + " has not been closed");
                 return ERROR_PAGE;
             }
+
+            LOGGER.infoRequest(request, "Completed confirmation for transaction " + transactionId,
+                    new HashMap<>());
 
             model.addAttribute("confirmation", confirmationService.getTransactionConfirmation(transaction));
 
