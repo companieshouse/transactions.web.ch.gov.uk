@@ -57,6 +57,10 @@
     <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
     <sonar.login></sonar.login>
     <sonar.password></sonar.password>
+
+    <!-- Vulnerability override versions -->
+    <kotlin-sdlib.override.version>2.3.21</kotlin-sdlib.override.version>
+    <okhttp.override.version>5.3.2</okhttp.override.version>
   </properties>
 
   <dependencyManagement>
@@ -83,6 +87,22 @@
         <version>${spring-boot-dependencies.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <!-- CVE-2020-29582(5.3) -->
+      <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>${kotlin-sdlib.override.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <!-- Source: https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp.override.version}</version>
+        <scope>compile</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
