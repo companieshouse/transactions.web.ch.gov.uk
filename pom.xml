@@ -61,6 +61,7 @@
     <!-- Vulnerability override versions -->
     <kotlin-sdlib.override.version>2.3.21</kotlin-sdlib.override.version>
     <okhttp.override.version>5.3.2</okhttp.override.version>
+    <log4j.override.version>2.26.0</log4j.override.version>
   </properties>
 
   <dependencyManagement>
@@ -102,6 +103,24 @@
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
         <version>${okhttp.override.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- CVE-2026-34477(6.3), CVE-2026-34479(6.9) -->
+      <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j -->
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-to-slf4j</artifactId>
+        <version>${log4j.override.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- CVE-2026-34477(6.3), CVE-2026-34479(6.9) -->
+      <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${log4j.override.version}</version>
         <scope>compile</scope>
       </dependency>
     </dependencies>
