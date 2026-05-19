@@ -62,6 +62,7 @@
     <kotlin-sdlib.override.version>2.3.21</kotlin-sdlib.override.version>
     <okhttp.override.version>5.3.2</okhttp.override.version>
     <log4j.override.version>2.26.0</log4j.override.version>
+    <tomcat-embed.override.version>10.1.55</tomcat-embed.override.version>
   </properties>
 
   <dependencyManagement>
@@ -124,7 +125,33 @@
         <scope>compile</scope>
       </dependency>
 
-      <!-- CVE-2025-67030(8.8)-->
+      <!-- CVE-2026-41293(9.8), CVE-2026-41284(7.5), CVE-2026-43513(7.5), CVE-2026-43512(9.8), CVE-2026-42498(7.3), CVE-2026-43515(9.1) -->
+      <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>${tomcat-embed.override.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- CVE-2026-41293(9.8), CVE-2026-41284(7.5), CVE-2026-43513(7.5), CVE-2026-43512(9.8), CVE-2026-42498(7.3), CVE-2026-43515(9.1)  -->
+      <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-el</artifactId>
+        <version>${tomcat-embed.override.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- CVE-2026-41293(9.8), CVE-2026-41284(7.5), CVE-2026-43513(7.5), CVE-2026-43512(9.8), CVE-2026-42498(7.3), CVE-2026-43515(9.1)  -->
+      <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>${tomcat-embed.override.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
