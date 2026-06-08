@@ -9,9 +9,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import uk.gov.companieshouse.csrf.config.ChsCsrfMitigationHttpSecurityBuilder;
 
 @EnableWebSecurity
+@Configuration(proxyBeanMethods=false)
 public class WebSecurity {
 
-    @Configuration
+    private WebSecurity(){}
+
     @Order(1)
     public static class CompanyAccountsSecurityFilterConfig {
 

@@ -22,15 +22,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>21</java.version>
-    <spring-boot-dependencies.version>3.5.14</spring-boot-dependencies.version>
-    <spring-boot-maven-plugin.version>3.5.14</spring-boot-maven-plugin.version>
+    <spring-boot-dependencies.version>4.0.6</spring-boot-dependencies.version>
+    <spring-boot-maven-plugin.version>4.0.6</spring-boot-maven-plugin.version>
     <thymeleaf-layout-dialect.version>3.4.0</thymeleaf-layout-dialect.version>
     <log4j-bom.version>2.25.0</log4j-bom.version>
     <hamcrest.version>3.0</hamcrest.version>
     <junit-jupiter-engine.version>5.13.1</junit-jupiter-engine.version>
     <mockito-junit-jupiter.version>5.18.0</mockito-junit-jupiter.version>
     <json.version>20250517</json.version>
-    <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
+    <opentelemetry-instrumentation-bom.version>2.28.0</opentelemetry-instrumentation-bom.version>
     <commons-lang3.version>3.18.0</commons-lang3.version>
 
     <!-- Internal Dependencies -->
@@ -134,14 +134,6 @@
         <scope>compile</scope>
       </dependency>
 
-      <!-- CVE-2026-41293(9.8), CVE-2026-41284(7.5), CVE-2026-43513(7.5), CVE-2026-43512(9.8), CVE-2026-42498(7.3), CVE-2026-43515(9.1)  -->
-      <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-el</artifactId>
-        <version>${tomcat-embed.override.version}</version>
-        <scope>compile</scope>
-      </dependency>
 
       <!-- CVE-2026-41293(9.8), CVE-2026-41284(7.5), CVE-2026-43513(7.5), CVE-2026-43512(9.8), CVE-2026-42498(7.3), CVE-2026-43515(9.1)  -->
       <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
@@ -182,7 +174,7 @@
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
       <exclusions>
         <exclusion>
           <groupId>ch.qos.logback</groupId>
