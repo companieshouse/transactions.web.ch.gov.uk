@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/baseLayout}">
 
@@ -8,6 +8,7 @@
         <title>Server error</title>
     </head>
     <body>
+        <!--/*@thymesVar id="globalLinks" type="java.util.Map<String, String>"*/-->
         <div layout:fragment="content">
 
             <div class="text">
@@ -17,9 +18,9 @@
             <p>Try again in a few moments.</p>
             <p>
                 If this problem continues please
-                <a th:href="@{{enquiries}(enquiries=${@environment.getProperty('enquiries')})}">email us</a>
+                <a th:href="${globalLinks.enquiries}">email us</a>
             </p>
-          
+
         </div>
     </body>
 </html>

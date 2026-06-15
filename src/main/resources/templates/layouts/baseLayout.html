@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<!--/*@thymesVar id="globalLinks" type="java.util.Map"*/-->
 <head>
     <meta charset="UTF-8">
     <title layout:title-pattern="$CONTENT_TITLE"></title>
     <div id="templateName" th:attr="data-id=${templateName}" hidden></div>
-    <link
-        th:href="@{{cdnUrl}/stylesheets/chs-styles.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
-        media="all" rel="stylesheet" type="text/css" />
-    <link
-        th:href="@{{cdnUrl}/stylesheets/chs-print-styles.css(cdnUrl=${@environment.getProperty('cdn.url')})}"
-        media="print" rel="stylesheet" type="text/css" />
-    <link
-        rel="icon"
-        th:href="@{{cdnUrl}/images/favicon.ico?0.17.3(cdnUrl=${@environment.getProperty('cdn.url')})}"
-        type="image/x-icon" />
+    <link th:href="${globalLinks.cdnUrl + '/stylesheets/chs-styles.css'}" media="all" rel="stylesheet" type="text/css" />
+    <link th:href="${globalLinks.cdnUrl + '/stylesheets/chs-print-styles.css'}" media="print" rel="stylesheet" type="text/css" />
+    <link rel="icon" th:href="${globalLinks.cdnUrl + '/images/favicon.ico?0.17.3'}" type="image/x-icon" />
 
     <script th:inline="javascript">
         window.SERVICE_NAME = 'transactions-web'
-        window.PIWIK_URL = [[${@environment.getProperty('piwik.url')}]];
-        window.PIWIK_SITE_ID = [[${@environment.getProperty('piwik.siteId')}]];
+        window.PIWIK_URL = [[${piwik.url}]];
+        window.PIWIK_SITE_ID = [[${piwik.siteId}]];
     </script>
 
 </head>
@@ -40,12 +34,12 @@
         <div class="push"></div>
     </div>
     <div th:replace="~{fragments/footer :: footer}"></div>
-    <script th:src="@{{cdnUrl}/javascripts/vendor/require.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
-    <script th:src="@{{cdnUrl}/javascripts/vendor/jquery-1.12.4.min.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
-    <script th:src="@{{cdnUrl}/javascripts/app/js-enable.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
-    <script th:src="@{{cdnUrl}/javascripts/app/piwik-enable.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
-    <script th:src="@{{cdnUrl}/javascripts/app/cookie-consent/cookie-consent-1.0.0.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
-    <script th:src="@{{cdnUrl}/javascripts/app/cookie-consent/piwik-only-cookie-consent.js(cdnUrl=${@environment.getProperty('cdn.url')})}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/vendor/require.js'}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/vendor/jquery-1.12.4.min.js'}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/app/js-enable.js'}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/app/piwik-enable.js'}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/app/cookie-consent/cookie-consent-1.0.0.js'}" type="text/javascript"></script>
+    <script th:src="${globalLinks.cdnUrl + '/javascripts/app/cookie-consent/piwik-only-cookie-consent.js'}" type="text/javascript"></script>
 
 </body>
 </html>

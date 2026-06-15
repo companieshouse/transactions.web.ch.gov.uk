@@ -2,14 +2,16 @@
 
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/baseLayout}">
+      layout:decorate="~{layouts/baseLayout}" lang="en">
 
 <head>
   <title>Confirmation</title>
 </head>
 <body>
+<!--/*@thymesVar id="globalLinks" type="java.util.Map<String, String>"*/-->
 <div id="confirmation-main-content" layout:fragment="content">
 
+  <!--/*@thymesVar id="confirmation" type="uk.gov.companieshouse.transactions.web.model.confirmation.Confirmation"*/-->
   <form id="confirmation-form" th:action="@{''}" th:object="${confirmation}" class="form">
 
     <div class="govuk-grid-row">
@@ -50,7 +52,7 @@
         </p>
         <p class="govuk-body" id="contact-us">
           If you've not received the confirmation, check your spam or junk mail folder. You should
-          <a th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}" class="piwik-event" data-event-id="Contact us">contact us</a>
+          <a th:href="${globalLinks.contactUsUrl}" class="piwik-event" data-event-id="Contact us">contact us</a>
           if you haven't had an email within 30 minutes.
         </p>
         <p class="govuk-body" id="second-email">
@@ -78,7 +80,7 @@
 
         <p class="govuk-body">
           <span id="confirmation-feedback">This is a new service. Help us improve it by
-            <a id="confirmation-feedback-link" th:href="${@environment.getProperty('feedback.url')}" target="_blank">completing our quick survey</a>.
+            <a id="confirmation-feedback-link" th:href="${globalLinks.feedbackUrl}" target="_blank">completing our quick survey</a>.
           </span>
         </p>
 

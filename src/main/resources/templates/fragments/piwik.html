@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Piwik</title>
     </head>
@@ -7,13 +7,12 @@
         <div th:fragment="piwik" class="govuk-visually-hidden">
             <script th:inline="javascript">
                 (function() {
-                    bindPiwikListener('transactions', /*[[${@environment.getProperty('piwik.url')}]]*/, /*[[${@environment.getProperty('piwik.siteId')}]]*/);
+                    bindPiwikListener('transactions', /*[[${piwik.url}]]*/, /*[[${piwik.siteId}]]*/);
                 })();
             </script>
             <noscript>
               <p>
-                <img th:src="@{{piwikUrl}/piwik.php?idsite={siteId}(piwikUrl=${@environment.getProperty('piwik.url')},
-                             siteId=${@environment.getProperty('piwik.site.id')})}" style="border:0;" alt="" />
+                <img th:src="@{{piwikUrl}/piwik.php?idsite={siteId}(piwikUrl=${piwik.url},siteId=${piwik.siteId})}" style="border:0;" alt="" />
               </p>
             </noscript>
         </div>
