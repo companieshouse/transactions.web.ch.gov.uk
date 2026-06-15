@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Header</title>
     </head>
+    <!--/*@thymesVar id="globalLinks" type="java.util.Map<String, String>"*/-->
     <body>
         <footer th:fragment="footer" class="group js-footer" id="footer" role="contentinfo">
             <nav>
                 <div>
                     <ul>
-                        <li><a id="policies-link" href="http://resources.companieshouse.gov.uk/serviceInformation.shtml">Policies</a></li>
-                        <li><a id="cookies-link" th:href="@{{chsUrl}/help/cookies(chsUrl=${@environment.getProperty('chs.url')})}">Cookies</a></li>
-                        <li><a id="contact-us-link" th:href="@{{chsUrl}/help/contact-us(chsUrl=${@environment.getProperty('chs.url')})}">Contact us</a></li>
-                        <li><a id="developer-link" th:href="@{{developerUrl}/api/docs/(developerUrl=${@environment.getProperty('developer.url')})}">Developers</a></li>
+                        <li><a id="policies-link" th:href="${globalLinks.policiesUrl}">Policies</a></li>
+                        <li><a id="cookies-link" th:href="${globalLinks.cookiesUrl}">Cookies</a></li>
+                        <li><a id="contact-us-link" th:href="${globalLinks.contactUsUrl}">Contact us</a></li>
+                        <li><a id="developer-link" th:href="${globalLinks.developerUrl}">Developers</a></li>
                     </ul>
                 </div>
             </nav>

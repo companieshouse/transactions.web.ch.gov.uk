@@ -24,9 +24,7 @@
         <java.version>21</java.version>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
-        <spring-boot.version>4.0.6</spring-boot.version>
-        <!-- Source: https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
-        <thymeleaf-layout-dialect.version>4.0.1</thymeleaf-layout-dialect.version>
+        <spring-boot.version>4.0.7</spring-boot.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom -->
         <log4j-bom.version>2.26.0</log4j-bom.version>
         <!-- Source: https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
@@ -111,22 +109,6 @@
                 <version>${okhttp.version}</version>
                 <scope>compile</scope>
             </dependency>
-
-            <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
-            <!-- Addresses https://www.cve.org/CVERecord?id=CVE-2026-41284 - Can probably be removed after 03/06/2026 following Spring Boot 4.0.7 release          -->
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>11.0.22</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-websocket</artifactId>
-                <version>11.0.22</version>
-                <scope>compile</scope>
-            </dependency>
-            <!-- END CVE           -->
 
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -214,7 +196,6 @@
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>${thymeleaf-layout-dialect.version}</version>
         </dependency>
 
         <!-- Session Handler -->
