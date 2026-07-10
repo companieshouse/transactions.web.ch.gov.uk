@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>You cannot file for this company</title>
+</head>
+<body>
+<div id="stop-not-eligible-content" layout:fragment="content">
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-l">You cannot file for this company</h1>
+
+      <p class="govuk-body">
+        You must be one of the following types of filer:
+      </p>
+
+      <ul class="govuk-list govuk-list--bullet">
+        <li th:each="type : ${eligibleTypes}"
+            th:if="${type.name() != 'NONE_OF_THE_ABOVE'}"
+            th:text="${type.displayName}">Filer type</li>
+      </ul>
+
+      <p class="govuk-body">
+        If you believe this is an error, <a th:href="${globalLinks.contactUsUrl}"
+                                            class="govuk-link">contact us</a>.
+      </p>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

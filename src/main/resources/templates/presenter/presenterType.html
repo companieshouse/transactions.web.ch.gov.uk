@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>What is your relationship to the company?</title>
+</head>
+<body>
+<div id="presenter-type-content" layout:fragment="content">
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <form method="post" th:action="@{/transaction/{id}/presenter(id=${transactionId})}">
+
+        <div class="govuk-form-group">
+          <fieldset class="govuk-fieldset" aria-describedby="presenter-type-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+              <h1 class="govuk-fieldset__heading">
+                What is your relationship to this filing?
+              </h1>
+            </legend>
+            <div id="presenter-type-hint" class="govuk-hint">
+              Select the option that best describes how you are filing.
+            </div>
+
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item" th:each="type : ${presenterTypes}"
+                   th:if="${type.name() != 'NONE_OF_THE_ABOVE'}">
+                <input class="govuk-radios__input"
+                       type="radio"
+                       name="presenterType"
+                       th:id="${'presenterType-' + type.name()}"
+                       th:value="${type.name()}" />
+                <label class="govuk-label govuk-radios__label"
+                       th:for="${'presenterType-' + type.name()}"
+                       th:text="${type.displayName}">Option</label>
+              </div>
+
+              <div class="govuk-radios__divider">or</div>
+
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input"
+                       type="radio"
+                       name="presenterType"
+                       id="presenterType-NONE_OF_THE_ABOVE"
+                       value="NONE_OF_THE_ABOVE" />
+                <label class="govuk-label govuk-radios__label"
+                       for="presenterType-NONE_OF_THE_ABOVE">
+                  None of the above
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          Continue
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

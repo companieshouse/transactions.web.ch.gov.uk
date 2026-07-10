@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>You need to verify your identity</title>
+</head>
+<body>
+<div id="stop-not-verified-content" layout:fragment="content">
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-l">You need to verify your identity</h1>
+
+      <p class="govuk-body">
+        To file for this company, you must first complete identity verification with Companies House.
+      </p>
+
+      <p class="govuk-body">
+        This is a one-time process. Once verified, you will be able to return and continue your filing.
+      </p>
+
+      <a th:href="${identityVerificationUrl}" role="button" draggable="false"
+         class="govuk-button" data-module="govuk-button">
+        Verify your identity
+      </a>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

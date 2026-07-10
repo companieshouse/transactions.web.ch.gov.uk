@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.transactions.web.api;
 
 import uk.gov.companieshouse.api.ApiClient;
+import uk.gov.companieshouse.api.InternalApiClient;
 
 /**
  * The {@code ApiClientService} interface provides an abstraction that can be
@@ -14,4 +15,10 @@ public interface ApiClientService {
      * @return an ApiClient
      */
     ApiClient getApiClient();
+
+    /**
+     * Returns an {@link InternalApiClient} for internal/private API calls
+     * @return an InternalApiClient
+     */
+    InternalApiClient getInternalApiClient();
 }
