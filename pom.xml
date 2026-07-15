@@ -14,7 +14,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.12</version>
+        <version>2.1.14</version>
         <relativePath/>
     </parent>
 
@@ -24,36 +24,49 @@
         <java.version>21</java.version>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
-        <spring-boot.version>4.0.7</spring-boot.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom -->
-        <log4j-bom.version>2.26.0</log4j-bom.version>
+        <log4j-bom.version>2.26.1</log4j-bom.version>
         <!-- Source: https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
         <hamcrest.version>3.0</hamcrest.version>
         <!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <mockito-junit-jupiter.version>5.23.0</mockito-junit-jupiter.version>
         <!-- Source: https://mvnrepository.com/artifact/org.json/json -->
-        <json.version>20251224</json.version>
+        <json.version>20260522</json.version>
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-instrumentation-bom -->
-        <opentelemetry.version>2.28.1</opentelemetry.version>
+        <opentelemetry.version>2.29.0</opentelemetry.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <commons-lang3.version>3.20.0</commons-lang3.version>
+        <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+        <tomcat.version>11.0.24</tomcat.version>
+        <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
+        <kotlin.version>2.3.21</kotlin.version>
+        <!-- Source: https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+        <okhttp.version>5.4.0</okhttp.version>
 
         <!-- Internal Dependencies -->
+        <!-- Source: https://github.com/companieshouse/common-web-java/releases -->
         <common-web-java.version>5.0.2</common-web-java.version>
-        <java-session-handler.version>4.1.22</java-session-handler.version>
+        <!-- Source: https://github.com/companieshouse/java-session-handler/releases -->
+        <java-session-handler.version>4.1.23</java-session-handler.version>
+        <!-- Source: https://github.com/companieshouse/sdk-manager-java/releases -->
         <sdk-manager-java.version>3.0.15</sdk-manager-java.version>
+        <!-- Source: https://github.com/companieshouse/structured-logging/releases -->
         <structured-logging.version>3.0.57</structured-logging.version>
-        <web-security-java.version>3.1.17</web-security-java.version>
+        <!-- Source: https://github.com/companieshouse/web-security-java/releases -->
+        <web-security-java.version>3.1.19</web-security-java.version>
 
         <!-- Maven and Surefire plugins -->
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <!-- Source: https://mvnrepository.com/artifact/com.google.cloud.tools/jib-maven-plugin -->
         <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
+        <!-- Source: https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
         <!-- Repositories -->
         <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
@@ -62,16 +75,7 @@
         <!-- Sonar config -->
         <sonar.projectKey>uk.gov.companieshouse:transactions.web.ch.gov.uk</sonar.projectKey>
         <sonar.projectName>transactions.web.ch.gov.uk</sonar.projectName>
-        <!--suppress UnresolvedMavenProperty -->
-        <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-        <sonar.login/>
-        <sonar.password/>
 
-        <!-- Vulnerability override versions -->
-        <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
-        <kotlin.version>2.3.21</kotlin.version>
-        <!-- Source: https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
-        <okhttp.version>5.3.2</okhttp.version>
     </properties>
 
     <dependencyManagement>
@@ -115,6 +119,22 @@
                 <artifactId>guava</artifactId>
                 <version>33.6.0-jre</version>
             </dependency>
+
+            <!-- BEGIN CVE OVERRIDE          -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <!-- END CVE           -->
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -341,6 +361,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
             </plugin>
 
             <plugin>
