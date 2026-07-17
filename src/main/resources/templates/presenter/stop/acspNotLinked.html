@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>You need to sign in with your ACSP account</title>
+</head>
+<body>
+<div id="stop-acsp-not-linked-content" layout:fragment="content">
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-l">You cannot file for this company</h1>
+
+      <p class="govuk-body">
+        The email address you used to sign in is not linked to an ACSP (Authorised Corporate Service Provider) account.
+      </p>
+
+      <p class="govuk-body">
+        To file as an ACSP representative, you need to sign in with the email address associated with your ACSP account.
+      </p>
+
+      <a th:href="${acspSignInUrl}" role="button" draggable="false"
+         class="govuk-button" data-module="govuk-button">
+        Sign in with ACSP account
+      </a>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

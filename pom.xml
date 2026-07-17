@@ -256,6 +256,12 @@
             <version>${sdk-manager-java.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>private-api-sdk-java</artifactId>
+            <version>unversioned</version>
+        </dependency>
+
         <!-- Security dependencies -->
         <dependency>
             <groupId>org.springframework.security</groupId>
