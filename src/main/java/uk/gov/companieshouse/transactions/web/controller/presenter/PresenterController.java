@@ -23,6 +23,11 @@ import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsSe
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +35,11 @@ import java.util.Map;
 /**
  * Controller for the presenter identity journey.
  *
- * <p>Entry point: {@code GET /transaction/{transactionId}/presenter?returnUrl=...}
+ * <p>Entry point: {@code GET /transaction/{transactionId}/presenter?jwt=...}
  * <p>Flow:
  * <ol>
- *   <li>Store {@code returnUrl} in session; render filer-type selection screen.</li>
+ *   <li>Verify the {@code jwt} (HS256, {@code CHS_JWT_SECRET}); store its {@code returnUrl}
+ *       claim in session; render filer-type selection screen.</li>
  *   <li>{@code POST} validates selected type; routes to stop screen or calls Presenter API.</li>
  *   <li>On success, stores response in session and redirects to statements screen.</li>
  *   <li>User confirms applicable statements; data is PATCHed onto the transaction.</li>
@@ -80,6 +86,9 @@ public class PresenterController {
     @Value("${identity.verification.url}")
     private String identityVerificationUrl;
 
+    @Value("${chs.jwt.secret}")
+    private String chsJwtSecret;
+
     public PresenterController(TransactionsService transactionsService,
             PresenterApiService presenterApiService,
             SessionService sessionService,
@@ -95,16 +104,19 @@ public class PresenterController {
     // -----------------------------------------------------------------------
 
     /**
-     * Entry point. Stores the {@code returnUrl} in the session and renders the
+     * Entry point. Verifies the supplied {@code jwt}, extracts the
+     * {@code returnUrl} claim, stores it in the session and renders the
      * filer-type selection screen.
      */
     @GetMapping
     public String getPresenterType(@PathVariable String transactionId,
-            @RequestParam(value = "returnUrl", required = false) String returnUrl,
+            @RequestParam(value = "jwt", required = false) String jwt,
             HttpServletRequest request,
             Model model) {
 
         LOGGER.infoRequest(request, "Presenter type page requested for transaction " + transactionId, new HashMap<>());
+
+        String returnUrl = extractReturnUrl(jwt, request);
 
         if (returnUrl != null && !returnUrl.isBlank()) {
             Map<String, Object> session = sessionService.getSessionDataFromContext();
@@ -114,6 +126,37 @@ public class PresenterController {
         model.addAttribute("presenterTypes", PresenterType.values());
         model.addAttribute("transactionId", transactionId);
         return TEMPLATE_PRESENTER_TYPE;
+    }
+
+    /**
+     * Verifies the HS256 signature of the supplied JWT using {@code CHS_JWT_SECRET}
+     * and returns the {@code returnUrl} claim. Returns {@code null} if the token is
+     * absent, malformed, has an invalid signature or lacks the claim.
+     */
+    private String extractReturnUrl(String jwt, HttpServletRequest request) {
+        if (jwt == null || jwt.isBlank()) {
+            return null;
+        }
+
+        try {
+            SignedJWT signedJwt = SignedJWT.parse(jwt);
+
+            if (signedJwt.getHeader().getAlgorithm() != JWSAlgorithm.HS256) {
+                LOGGER.errorRequest(request, "Presenter JWT rejected: unexpected signing algorithm");
+                return null;
+            }
+
+            JWSVerifier verifier = new MACVerifier(chsJwtSecret.getBytes(StandardCharsets.UTF_8));
+            if (!signedJwt.verify(verifier)) {
+                LOGGER.errorRequest(request, "Presenter JWT rejected: signature verification failed");
+                return null;
+            }
+
+            return signedJwt.getJWTClaimsSet().getStringClaim("returnUrl");
+        } catch (Exception e) {
+            LOGGER.errorRequest(request, "Failed to parse or verify presenter JWT: " + e.getMessage(), e);
+            return null;
+        }
     }
 
     /**

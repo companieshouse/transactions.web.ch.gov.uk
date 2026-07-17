@@ -1,6 +1,11 @@
 package uk.gov.companieshouse.transactions.web.controller.presenter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +64,7 @@ public class PresenterControllerTests {
     private static final String RETURN_URL = "/psc-verification/presenter-return/" + TRANSACTION_ID;
     private static final String ACSP_SIGN_IN_URL = "http://acsp.chs.local/sign-in";
     private static final String IDV_URL = "http://idv.chs.local/verify";
+    private static final String JWT_SECRET = "a-test-secret-that-is-at-least-32-bytes-long!!";
 
     private Map<String, Object> sessionData;
 
@@ -67,6 +73,7 @@ public class PresenterControllerTests {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         ReflectionTestUtils.setField(controller, "acspSignInUrl", ACSP_SIGN_IN_URL);
         ReflectionTestUtils.setField(controller, "identityVerificationUrl", IDV_URL);
+        ReflectionTestUtils.setField(controller, "chsJwtSecret", JWT_SECRET);
         ReflectionTestUtils.setField(controller, "objectMapper", new ObjectMapper());
 
         sessionData = new HashMap<>();
@@ -78,10 +85,10 @@ public class PresenterControllerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("GET /presenter - renders presenter type page and stores returnUrl in session")
+    @DisplayName("GET /presenter - renders presenter type page and stores returnUrl from JWT in session")
     void getPresenterTypeStoresReturnUrlAndRendersPage() throws Exception {
         mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
-                        .param("returnUrl", RETURN_URL))
+                        .param("jwt", signedJwt(RETURN_URL)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("presenter/presenterType"))
                 .andExpect(model().attributeExists("presenterTypes"));
@@ -90,11 +97,26 @@ public class PresenterControllerTests {
     }
 
     @Test
-    @DisplayName("GET /presenter - renders page without error when no returnUrl supplied")
+    @DisplayName("GET /presenter - renders page without error when no JWT supplied")
     void getPresenterTypeNoReturnUrl() throws Exception {
         mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID))
                 .andExpect(status().isOk())
                 .andExpect(view().name("presenter/presenterType"));
+
+        assert sessionData.get(PresenterController.SESSION_RETURN_URL) == null;
+    }
+
+    @Test
+    @DisplayName("GET /presenter - JWT with invalid signature does not store returnUrl")
+    void getPresenterTypeInvalidSignatureIgnored() throws Exception {
+        String tamperedJwt = signedJwt(RETURN_URL) + "tampered";
+
+        mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("jwt", tamperedJwt))
+                .andExpect(status().isOk())
+                .andExpect(view().name("presenter/presenterType"));
+
+        assert sessionData.get(PresenterController.SESSION_RETURN_URL) == null;
     }
 
     // -----------------------------------------------------------------------
@@ -280,8 +302,16 @@ public class PresenterControllerTests {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private Transaction buildTransaction() {
-        Transaction tx = new Transaction();
+    private String signedJwt(String returnUrl) throws Exception {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .claim("returnUrl", returnUrl)
+                .build();
+        SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
+        signedJwt.sign(new MACSigner(JWT_SECRET.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        return signedJwt.serialize();
+    }
+
+    private Transaction buildTransaction() {        Transaction tx = new Transaction();
         tx.setCompanyNumber("12345678");
         tx.setDescription("PSC Verification Transaction");
         return tx;
