@@ -50,7 +50,7 @@
         <!-- Source: https://github.com/companieshouse/java-session-handler/releases -->
         <java-session-handler.version>4.1.23</java-session-handler.version>
         <!-- Source: https://github.com/companieshouse/sdk-manager-java/releases -->
-        <sdk-manager-java.version>3.0.15</sdk-manager-java.version>
+        <sdk-manager-java.version>unversioned</sdk-manager-java.version>
         <!-- Source: https://github.com/companieshouse/structured-logging/releases -->
         <structured-logging.version>3.0.57</structured-logging.version>
         <!-- Source: https://github.com/companieshouse/web-security-java/releases -->

@@ -13,7 +13,6 @@ import java.io.PrintStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,11 +21,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.companieshouse.logging.util.LogContextProperties;
 
 @ExtendWith(MockitoExtension.class)
-public class LoggingInterceptorTests {
+class LoggingInterceptorTests {
 
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -42,7 +42,7 @@ public class LoggingInterceptorTests {
     private ByteArrayOutputStream out;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(httpServletRequest.getSession()).thenReturn(session);
         out = new ByteArrayOutputStream();
         System.setOut(new PrintStream(out));
@@ -50,7 +50,7 @@ public class LoggingInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor logs the start of the request")
-    public void preHandle() {
+    void preHandle() {
         loggingInterceptor.preHandle(httpServletRequest, httpServletResponse, new Object());
         verify(session, times(1)).setAttribute(eq(LogContextProperties.START_TIME_KEY.value()), anyLong());
         String data = this.getOutputJson().toString();
@@ -60,10 +60,10 @@ public class LoggingInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor logs the end of the request")
-    public void postHandle() {
+    void postHandle() {
         when(session.getAttribute(LogContextProperties.START_TIME_KEY.value()))
                 .thenReturn(System.currentTimeMillis());
-        when(httpServletResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
+        when(httpServletResponse.getStatus()).thenReturn(HttpStatus.OK.value());
         loggingInterceptor.postHandle(httpServletRequest, httpServletResponse, new Object(),
                 new ModelAndView());
         verify(session, times(1)).getAttribute(LogContextProperties.START_TIME_KEY.value());
