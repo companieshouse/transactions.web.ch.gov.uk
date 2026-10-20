@@ -33,6 +33,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -81,42 +82,72 @@ public class PresenterControllerTests {
     }
 
     // -----------------------------------------------------------------------
-    // GET /transaction/{id}/presenter
+    // GET /transaction/{id}/presenter?token=...
     // -----------------------------------------------------------------------
 
-    @Test
-    @DisplayName("GET /presenter - renders presenter type page and stores returnUrl from JWT in session")
-    void getPresenterTypeStoresReturnUrlAndRendersPage() throws Exception {
-        mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
-                        .param("jwt", signedJwt(RETURN_URL)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("presenter/presenterType"))
-                .andExpect(model().attributeExists("presenterTypes"));
+    private static final String FORM_TYPE = "ACSP01";
+    private static final String BACK_URL = "http://chs.local/register-as-companies-house-authorised-agent/type-of-business?lang=en";
+    private static final String LANG = "en";
 
-        assert sessionData.get(PresenterController.SESSION_RETURN_URL).equals(RETURN_URL);
+    @Test
+    @DisplayName("GET /presenter - unpacks JWT claims into the model without using the session")
+    void getPresenterTypeAddsTokenClaimsToModel() throws Exception {
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+
+        mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("token", token))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("token", token))
+                .andExpect(view().name("presenter/presenterType"))
+                .andExpect(model().attributeExists("presenterTypes"))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
+                .andExpect(model().attribute("formType", FORM_TYPE))
+                .andExpect(model().attribute("returnUrl", RETURN_URL))
+                .andExpect(model().attribute("backUrl", BACK_URL))
+                .andExpect(model().attribute("lang", LANG));
+
+        // return_url is read from the token at the end of the journey, not held in session
+        assert sessionData.isEmpty();
     }
 
     @Test
-    @DisplayName("GET /presenter - renders page without error when no JWT supplied")
-    void getPresenterTypeNoReturnUrl() throws Exception {
+    @DisplayName("GET /presenter - renders page without token data when no JWT supplied")
+    void getPresenterTypeNoToken() throws Exception {
         mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID))
                 .andExpect(status().isOk())
-                .andExpect(view().name("presenter/presenterType"));
+                .andExpect(view().name("presenter/presenterType"))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
+                .andExpect(model().attributeDoesNotExist("token", "formType", "returnUrl", "backUrl", "lang"));
 
-        assert sessionData.get(PresenterController.SESSION_RETURN_URL) == null;
+        assert sessionData.isEmpty();
     }
 
     @Test
-    @DisplayName("GET /presenter - JWT with invalid signature does not store returnUrl")
+    @DisplayName("GET /presenter - JWT with invalid signature is ignored")
     void getPresenterTypeInvalidSignatureIgnored() throws Exception {
-        String tamperedJwt = signedJwt(RETURN_URL) + "tampered";
+        String tamperedJwt = signedJwt(presenterClaims(TRANSACTION_ID)) + "tampered";
 
         mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
-                        .param("jwt", tamperedJwt))
+                        .param("token", tamperedJwt))
                 .andExpect(status().isOk())
-                .andExpect(view().name("presenter/presenterType"));
+                .andExpect(view().name("presenter/presenterType"))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
+                .andExpect(model().attributeDoesNotExist("token", "formType", "returnUrl", "backUrl", "lang"));
 
-        assert sessionData.get(PresenterController.SESSION_RETURN_URL) == null;
+        assert sessionData.isEmpty();
+    }
+
+    @Test
+    @DisplayName("GET /presenter - JWT issued for a different transaction is ignored")
+    void getPresenterTypeTransactionIdMismatchIgnored() throws Exception {
+        mockMvc.perform(get("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("token", signedJwt(presenterClaims("another-transaction"))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("presenter/presenterType"))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
+                .andExpect(model().attributeDoesNotExist("token", "formType", "returnUrl", "backUrl", "lang"));
+
+        assert sessionData.isEmpty();
     }
 
     // -----------------------------------------------------------------------
@@ -193,9 +224,92 @@ public class PresenterControllerTests {
                 .andExpect(view().name("error"));
     }
 
+    @Test
+    @DisplayName("POST /presenter with no selection keeps the token on the redirect back")
+    void postPresenterTypeNoSelectionKeepsToken() throws Exception {
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+
+        mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transaction/" + TRANSACTION_ID + "/presenter?token=" + token));
+    }
+
+    @Test
+    @DisplayName("POST /presenter with NONE_OF_THE_ABOVE keeps the token on the stop screen redirect")
+    void postPresenterTypeNoneOfTheAboveKeepsToken() throws Exception {
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+
+        mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("presenterType", "NONE_OF_THE_ABOVE")
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transaction/" + TRANSACTION_ID + "/presenter/stop/not-eligible?token=" + token));
+    }
+
+    @Test
+    @DisplayName("POST /presenter with successful API call keeps the token on the statements redirect")
+    void postPresenterTypeSuccessKeepsToken() throws Exception {
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(buildTransaction());
+        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(new PresenterApiService.Success(buildApiResponse()));
+
+        mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("presenterType", "ACSP_OWNER")
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transaction/" + TRANSACTION_ID + "/presenter/statements?token=" + token));
+    }
+
+    @Test
+    @DisplayName("POST /presenter with API failure keeps the token on the stop screen redirect")
+    void postPresenterTypeFailureKeepsToken() throws Exception {
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+        when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(buildTransaction());
+        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(new PresenterApiService.Failure(PresenterApiError.ACSP_NOT_LINKED));
+
+        mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
+                        .param("presenterType", "ACSP_OWNER")
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transaction/" + TRANSACTION_ID + "/presenter/stop/acsp-not-linked?token=" + token));
+    }
+
     // -----------------------------------------------------------------------
     // GET /transaction/{id}/presenter/statements
     // -----------------------------------------------------------------------
+
+    @Test
+    @DisplayName("GET /statements - unpacks JWT claims into the model")
+    void getStatementsAddsTokenClaimsToModel() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+
+        mockMvc.perform(get("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("token", token))
+                .andExpect(status().isOk())
+                .andExpect(view().name("presenter/presenterStatements"))
+                .andExpect(model().attribute("token", token))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
+                .andExpect(model().attribute("formType", FORM_TYPE))
+                .andExpect(model().attribute("returnUrl", RETURN_URL))
+                .andExpect(model().attribute("backUrl", BACK_URL))
+                .andExpect(model().attribute("lang", LANG));
+    }
+
+    @Test
+    @DisplayName("GET /statements - JWT with invalid signature is ignored")
+    void getStatementsInvalidTokenIgnored() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+
+        mockMvc.perform(get("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("token", signedJwt(presenterClaims(TRANSACTION_ID)) + "tampered"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("presenter/presenterStatements"))
+                .andExpect(model().attributeDoesNotExist("token", "formType", "returnUrl", "backUrl", "lang"));
+    }
 
     @Test
     @DisplayName("GET /statements - renders statements page when API response in session")
@@ -221,18 +335,59 @@ public class PresenterControllerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("POST /statements - patches data and redirects to returnUrl")
+    @DisplayName("POST /statements - patches data and redirects to the token's return_url")
     void postStatementsSuccessRedirectsToReturnUrl() throws Exception {
         sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
-        sessionData.put(PresenterController.SESSION_RETURN_URL, RETURN_URL);
 
         mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
                         .param("selectedStatements", "Statement one")
-                        .param("selectedStatements", "Statement two"))
+                        .param("selectedStatements", "Statement two")
+                        .param("token", signedJwt(presenterClaims(TRANSACTION_ID))))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(RETURN_URL));
 
         verify(transactionsService).patchPresenterData(anyString(), any(PresenterApiResponse.class));
+        assert sessionData.get(PresenterController.SESSION_API_RESPONSE) == null;
+    }
+
+    @Test
+    @DisplayName("POST /statements - no token returns error page without patching")
+    void postStatementsNoTokenReturnsErrorPage() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+
+        mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("selectedStatements", "Statement one"))
+                .andExpect(view().name("error"));
+
+        verify(transactionsService, never()).patchPresenterData(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("POST /statements - invalid token returns error page without patching")
+    void postStatementsInvalidTokenReturnsErrorPage() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+
+        mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("selectedStatements", "Statement one")
+                        .param("token", signedJwt(presenterClaims(TRANSACTION_ID)) + "tampered"))
+                .andExpect(view().name("error"));
+
+        verify(transactionsService, never()).patchPresenterData(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("POST /statements - token without return_url returns error page without patching")
+    void postStatementsTokenWithoutReturnUrlReturnsErrorPage() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+        Map<String, Object> claims = presenterClaims(TRANSACTION_ID);
+        claims.remove("return_url");
+
+        mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("selectedStatements", "Statement one")
+                        .param("token", signedJwt(claims)))
+                .andExpect(view().name("error"));
+
+        verify(transactionsService, never()).patchPresenterData(anyString(), any());
     }
 
     @Test
@@ -243,6 +398,19 @@ public class PresenterControllerTests {
         mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/transaction/" + TRANSACTION_ID + "/presenter/statements*"));
+    }
+
+    @Test
+    @DisplayName("POST /statements - no statements selected keeps the token on the redirect back")
+    void postStatementsNoSelectionKeepsToken() throws Exception {
+        sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
+        String token = signedJwt(presenterClaims(TRANSACTION_ID));
+
+        mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transaction/" + TRANSACTION_ID
+                        + "/presenter/statements?error=noStatements&token=" + token));
     }
 
     @Test
@@ -257,13 +425,13 @@ public class PresenterControllerTests {
     @DisplayName("POST /statements - service exception on patch returns error page")
     void postStatementsServiceExceptionReturnsErrorPage() throws Exception {
         sessionData.put(PresenterController.SESSION_API_RESPONSE, buildApiResponse());
-        sessionData.put(PresenterController.SESSION_RETURN_URL, RETURN_URL);
 
         org.mockito.Mockito.doThrow(new ServiceException("patch failed", new RuntimeException()))
                 .when(transactionsService).patchPresenterData(anyString(), any());
 
         mockMvc.perform(post("/transaction/{id}/presenter/statements", TRANSACTION_ID)
-                        .param("selectedStatements", "Statement one"))
+                        .param("selectedStatements", "Statement one")
+                        .param("token", signedJwt(presenterClaims(TRANSACTION_ID))))
                 .andExpect(view().name("error"));
     }
 
@@ -302,11 +470,20 @@ public class PresenterControllerTests {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private String signedJwt(String returnUrl) throws Exception {
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .claim("returnUrl", returnUrl)
-                .build();
-        SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
+    private Map<String, Object> presenterClaims(String transactionId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("form_type", FORM_TYPE);
+        claims.put("transaction_id", transactionId);
+        claims.put("return_url", RETURN_URL);
+        claims.put("back_url", BACK_URL);
+        claims.put("lang", LANG);
+        return claims;
+    }
+
+    private String signedJwt(Map<String, Object> claims) throws Exception {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+        claims.forEach(builder::claim);
+        SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), builder.build());
         signedJwt.sign(new MACSigner(JWT_SECRET.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         return signedJwt.serialize();
     }

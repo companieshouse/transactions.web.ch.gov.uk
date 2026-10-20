@@ -13,7 +13,10 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
+      <div th:replace="~{fragments/presenterTokenDetails :: presenterTokenDetails}"></div>
+
       <form method="post" th:action="@{/transaction/{id}/presenter(id=${transactionId})}">
+        <input type="hidden" name="token" th:if="${token != null}" th:value="${token}" />
 
         <div class="govuk-form-group">
           <fieldset class="govuk-fieldset" aria-describedby="presenter-type-hint">

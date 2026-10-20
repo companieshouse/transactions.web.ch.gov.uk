@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <table th:fragment="presenterTokenDetails" class="govuk-table">
+      <caption class="govuk-table__caption govuk-table__caption--m">JWT TOKEN DATA</caption>
+      <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Field</th>
+        <th scope="col" class="govuk-table__header">Value</th>
+      </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Form type</th>
+        <td class="govuk-table__cell" th:text="${formType}"></td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Transaction ID</th>
+        <td class="govuk-table__cell" th:text="${transactionId}"></td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Return Url</th>
+        <td class="govuk-table__cell" th:text="${returnUrl}"></td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Back Url</th>
+        <td class="govuk-table__cell" th:text="${backUrl}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

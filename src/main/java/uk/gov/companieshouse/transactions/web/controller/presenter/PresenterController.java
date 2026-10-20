@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -26,8 +27,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,15 +38,17 @@ import java.util.Map;
 /**
  * Controller for the presenter identity journey.
  *
- * <p>Entry point: {@code GET /transaction/{transactionId}/presenter?jwt=...}
+ * <p>Entry point: {@code GET /transaction/{transactionId}/presenter?token=...}
  * <p>Flow:
  * <ol>
- *   <li>Verify the {@code jwt} (HS256, {@code CHS_JWT_SECRET}); store its {@code returnUrl}
- *       claim in session; render filer-type selection screen.</li>
- *   <li>{@code POST} validates selected type; routes to stop screen or calls Presenter API.</li>
+ *   <li>Verify the {@code token} (HS256, {@code CHS_JWT_SECRET}); add its claims to the model;
+ *       render filer-type selection screen.</li>
+ *   <li>{@code POST} validates selected type; routes to stop screen or calls Presenter API.
+ *       The {@code token} is submitted as a hidden form field and kept on every redirect so
+ *       each page can show its data.</li>
  *   <li>On success, stores response in session and redirects to statements screen.</li>
  *   <li>User confirms applicable statements; data is PATCHed onto the transaction.</li>
- *   <li>Redirect to the stored {@code returnUrl}.</li>
+ *   <li>Redirect to the token's {@code return_url}.</li>
  * </ol>
  */
 @Controller
@@ -56,8 +61,22 @@ public class PresenterController {
     private static final String ERROR_PAGE = "error";
 
     /** Session keys — namespaced to avoid collision with other journeys. */
-    static final String SESSION_RETURN_URL = "presenter.return_url";
     static final String SESSION_API_RESPONSE = "presenter.api_response";
+
+    /**
+     * Query parameter carrying the presenter JWT. The token is passed from page to page
+     * (rather than held in session) so every page can show the calling service's data.
+     */
+    static final String TOKEN_PARAM = "token";
+
+    private static final String PRESENTER_PATH = "/transaction/{transactionId}/presenter";
+
+    /** Claim names in the presenter redirect JWT issued by the calling service. */
+    private static final String CLAIM_FORM_TYPE = "form_type";
+    private static final String CLAIM_TRANSACTION_ID = "transaction_id";
+    private static final String CLAIM_RETURN_URL = "return_url";
+    private static final String CLAIM_BACK_URL = "back_url";
+    private static final String CLAIM_LANG = "lang";
 
     /** Template names. */
     private static final String TEMPLATE_PRESENTER_TYPE = "presenter/presenterType";
@@ -104,24 +123,19 @@ public class PresenterController {
     // -----------------------------------------------------------------------
 
     /**
-     * Entry point. Verifies the supplied {@code jwt}, extracts the
-     * {@code returnUrl} claim, stores it in the session and renders the
-     * filer-type selection screen.
+     * Entry point. Verifies the supplied {@code token}, adds its claims to the model
+     * and renders the filer-type selection screen. The token is ignored if its {@code transaction_id}
+     * does not match the transaction in the path.
      */
     @GetMapping
     public String getPresenterType(@PathVariable String transactionId,
-            @RequestParam(value = "jwt", required = false) String jwt,
+            @RequestParam(value = TOKEN_PARAM, required = false) String jwt,
             HttpServletRequest request,
             Model model) {
 
         LOGGER.infoRequest(request, "Presenter type page requested for transaction " + transactionId, new HashMap<>());
 
-        String returnUrl = extractReturnUrl(jwt, request);
-
-        if (returnUrl != null && !returnUrl.isBlank()) {
-            Map<String, Object> session = sessionService.getSessionDataFromContext();
-            session.put(SESSION_RETURN_URL, returnUrl);
-        }
+        addTokenToModel(jwt, transactionId, request, model);
 
         model.addAttribute("presenterTypes", PresenterType.values());
         model.addAttribute("transactionId", transactionId);
@@ -129,11 +143,45 @@ public class PresenterController {
     }
 
     /**
-     * Verifies the HS256 signature of the supplied JWT using {@code CHS_JWT_SECRET}
-     * and returns the {@code returnUrl} claim. Returns {@code null} if the token is
-     * absent, malformed, has an invalid signature or lacks the claim.
+     * Verifies the token and, if valid, adds it and its claims to the model so the page can
+     * display them and pass the token on. Returns the claims, or {@code null} if the token
+     * was not accepted.
      */
-    private String extractReturnUrl(String jwt, HttpServletRequest request) {
+    private JWTClaimsSet addTokenToModel(String jwt, String transactionId, HttpServletRequest request, Model model) {
+        JWTClaimsSet claims = verifyToken(jwt, transactionId, request);
+
+        if (claims != null) {
+            model.addAttribute(TOKEN_PARAM, jwt);
+            model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
+            model.addAttribute("returnUrl", getStringClaim(claims, CLAIM_RETURN_URL));
+            model.addAttribute("backUrl", getStringClaim(claims, CLAIM_BACK_URL));
+            model.addAttribute("lang", getStringClaim(claims, CLAIM_LANG));
+        }
+
+        return claims;
+    }
+
+    /**
+     * Builds a redirect to a page in this journey, keeping the token on the URL when present.
+     * The token is not re-verified here; the receiving page verifies it before using it.
+     */
+    private static String redirectToPresenterPage(String transactionId, String subPath, String token) {
+        return redirectToPresenterPage(UriComponentsBuilder.fromPath(PRESENTER_PATH + subPath), transactionId, token);
+    }
+
+    private static String redirectToPresenterPage(UriComponentsBuilder uri, String transactionId, String token) {
+        if (token != null && !token.isBlank()) {
+            uri.queryParam(TOKEN_PARAM, token);
+        }
+        return UrlBasedViewResolver.REDIRECT_URL_PREFIX + uri.buildAndExpand(transactionId).encode().toUriString();
+    }
+
+    /**
+     * Verifies the HS256 signature of the supplied JWT using {@code CHS_JWT_SECRET}
+     * and returns its claims. Returns {@code null} if the token is absent, malformed,
+     * has an invalid signature or was issued for a different transaction.
+     */
+    private JWTClaimsSet verifyToken(String jwt, String transactionId, HttpServletRequest request) {
         if (jwt == null || jwt.isBlank()) {
             return null;
         }
@@ -152,9 +200,27 @@ public class PresenterController {
                 return null;
             }
 
-            return signedJwt.getJWTClaimsSet().getStringClaim("returnUrl");
+            JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
+
+            // Stops a token issued for one transaction being replayed against another
+            if (!transactionId.equals(getStringClaim(claims, CLAIM_TRANSACTION_ID))) {
+                LOGGER.errorRequest(request, "Presenter JWT rejected: transaction_id does not match transaction "
+                        + transactionId);
+                return null;
+            }
+
+            return claims;
         } catch (Exception e) {
             LOGGER.errorRequest(request, "Failed to parse or verify presenter JWT: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /** Returns the named claim, or {@code null} if it is missing or not a string. */
+    private static String getStringClaim(JWTClaimsSet claims, String name) {
+        try {
+            return claims.getStringClaim(name);
+        } catch (ParseException e) {
             return null;
         }
     }
@@ -165,13 +231,13 @@ public class PresenterController {
     @PostMapping
     public String postPresenterType(@PathVariable String transactionId,
             @RequestParam(value = "presenterType", required = false) String presenterTypeParam,
+            @RequestParam(value = TOKEN_PARAM, required = false) String token,
             HttpServletRequest request) {
 
         LOGGER.infoRequest(request, "Presenter type submitted for transaction " + transactionId, new HashMap<>());
 
         if (presenterTypeParam == null || presenterTypeParam.isBlank()) {
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                    + "/transaction/" + transactionId + "/presenter";
+            return redirectToPresenterPage(transactionId, "", token);
         }
 
         PresenterType presenterType;
@@ -183,8 +249,7 @@ public class PresenterController {
         }
 
         if (presenterType == PresenterType.NONE_OF_THE_ABOVE) {
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                    + "/transaction/" + transactionId + "/presenter/stop/not-eligible";
+            return redirectToPresenterPage(transactionId, "/stop/not-eligible", token);
         }
 
         // Retrieve transaction to get company number and derive form type.
@@ -206,17 +271,14 @@ public class PresenterController {
         if (result instanceof PresenterApiService.Success success) {
             Map<String, Object> session = sessionService.getSessionDataFromContext();
             session.put(SESSION_API_RESPONSE, success.response());
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                    + "/transaction/" + transactionId + "/presenter/statements";
+            return redirectToPresenterPage(transactionId, "/statements", token);
         }
 
         if (result instanceof PresenterApiService.Failure failure) {
             if (failure.error() == PresenterApiError.ACSP_NOT_LINKED) {
-                return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                        + "/transaction/" + transactionId + "/presenter/stop/acsp-not-linked";
+                return redirectToPresenterPage(transactionId, "/stop/acsp-not-linked", token);
             }
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                    + "/transaction/" + transactionId + "/presenter/stop/not-verified";
+            return redirectToPresenterPage(transactionId, "/stop/not-verified", token);
         }
 
         return ERROR_PAGE;
@@ -228,6 +290,7 @@ public class PresenterController {
 
     @GetMapping("/statements")
     public String getStatements(@PathVariable String transactionId,
+            @RequestParam(value = TOKEN_PARAM, required = false) String token,
             HttpServletRequest request,
             Model model) {
 
@@ -243,12 +306,14 @@ public class PresenterController {
         model.addAttribute("statements", apiResponse.getStatements());
         model.addAttribute("individualUser", apiResponse.getIndividualUser());
         model.addAttribute("transactionId", transactionId);
+        addTokenToModel(token, transactionId, request, model);
         return TEMPLATE_STATEMENTS;
     }
 
     @PostMapping("/statements")
     public String postStatements(@PathVariable String transactionId,
             @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
+            @RequestParam(value = TOKEN_PARAM, required = false) String token,
             HttpServletRequest request) {
 
         Map<String, Object> session = sessionService.getSessionDataFromContext();
@@ -262,8 +327,18 @@ public class PresenterController {
 
         if (selectedStatements == null || selectedStatements.isEmpty()) {
             // Re-render the statements page with an error — at least one statement must be confirmed.
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX
-                    + "/transaction/" + transactionId + "/presenter/statements?error=noStatements";
+            return redirectToPresenterPage(
+                    UriComponentsBuilder.fromPath(PRESENTER_PATH + "/statements").queryParam("error", "noStatements"),
+                    transactionId, token);
+        }
+
+        // Checked before patching so the transaction is not updated when we cannot send the user back.
+        JWTClaimsSet claims = verifyToken(token, transactionId, request);
+        String returnUrl = claims == null ? null : getStringClaim(claims, CLAIM_RETURN_URL);
+
+        if (returnUrl == null || returnUrl.isBlank()) {
+            LOGGER.errorRequest(request, "No valid return_url in presenter token for transaction " + transactionId);
+            return ERROR_PAGE;
         }
 
         // Replace the full statement list with only the selected ones before persisting.
@@ -276,19 +351,9 @@ public class PresenterController {
             return ERROR_PAGE;
         }
 
-        String returnUrl = (String) session.get(SESSION_RETURN_URL);
-
-        // Clean up session state.
         session.remove(SESSION_API_RESPONSE);
-        session.remove(SESSION_RETURN_URL);
 
-        if (returnUrl != null && !returnUrl.isBlank()) {
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX + returnUrl;
-        }
-
-        // Fallback — should not normally be reached.
-        LOGGER.errorRequest(request, "No returnUrl in session after completing presenter journey for " + transactionId);
-        return ERROR_PAGE;
+        return UrlBasedViewResolver.REDIRECT_URL_PREFIX + returnUrl;
     }
 
     // -----------------------------------------------------------------------
