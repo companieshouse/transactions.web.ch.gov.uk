@@ -24,16 +24,14 @@ import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsSe
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import java.nio.charset.StandardCharsets;
+
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static uk.gov.companieshouse.transactions.web.controller.presenter.JwtUtils.getStringClaim;
 
 /**
  * Controller for the presenter identity journey.
@@ -135,30 +133,11 @@ public class PresenterController {
 
         LOGGER.infoRequest(request, "Presenter type page requested for transaction " + transactionId, new HashMap<>());
 
-        addTokenToModel(jwt, transactionId, request, model);
+        addTokenToModel(jwt, model);
 
         model.addAttribute("presenterTypes", PresenterType.values());
         model.addAttribute("transactionId", transactionId);
         return TEMPLATE_PRESENTER_TYPE;
-    }
-
-    /**
-     * Verifies the token and, if valid, adds it and its claims to the model so the page can
-     * display them and pass the token on. Returns the claims, or {@code null} if the token
-     * was not accepted.
-     */
-    private JWTClaimsSet addTokenToModel(String jwt, String transactionId, HttpServletRequest request, Model model) {
-        JWTClaimsSet claims = verifyToken(jwt, transactionId, request);
-
-        if (claims != null) {
-            model.addAttribute(TOKEN_PARAM, jwt);
-            model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
-            model.addAttribute("returnUrl", getStringClaim(claims, CLAIM_RETURN_URL));
-            model.addAttribute("backUrl", getStringClaim(claims, CLAIM_BACK_URL));
-            model.addAttribute("lang", getStringClaim(claims, CLAIM_LANG));
-        }
-
-        return claims;
     }
 
     /**
@@ -174,55 +153,6 @@ public class PresenterController {
             uri.queryParam(TOKEN_PARAM, token);
         }
         return UrlBasedViewResolver.REDIRECT_URL_PREFIX + uri.buildAndExpand(transactionId).encode().toUriString();
-    }
-
-    /**
-     * Verifies the HS256 signature of the supplied JWT using {@code CHS_JWT_SECRET}
-     * and returns its claims. Returns {@code null} if the token is absent, malformed,
-     * has an invalid signature or was issued for a different transaction.
-     */
-    private JWTClaimsSet verifyToken(String jwt, String transactionId, HttpServletRequest request) {
-        if (jwt == null || jwt.isBlank()) {
-            return null;
-        }
-
-        try {
-            SignedJWT signedJwt = SignedJWT.parse(jwt);
-
-            if (signedJwt.getHeader().getAlgorithm() != JWSAlgorithm.HS256) {
-                LOGGER.errorRequest(request, "Presenter JWT rejected: unexpected signing algorithm");
-                return null;
-            }
-
-            JWSVerifier verifier = new MACVerifier(chsJwtSecret.getBytes(StandardCharsets.UTF_8));
-            if (!signedJwt.verify(verifier)) {
-                LOGGER.errorRequest(request, "Presenter JWT rejected: signature verification failed");
-                return null;
-            }
-
-            JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
-
-            // Stops a token issued for one transaction being replayed against another
-            if (!transactionId.equals(getStringClaim(claims, CLAIM_TRANSACTION_ID))) {
-                LOGGER.errorRequest(request, "Presenter JWT rejected: transaction_id does not match transaction "
-                        + transactionId);
-                return null;
-            }
-
-            return claims;
-        } catch (Exception e) {
-            LOGGER.errorRequest(request, "Failed to parse or verify presenter JWT: " + e.getMessage(), e);
-            return null;
-        }
-    }
-
-    /** Returns the named claim, or {@code null} if it is missing or not a string. */
-    private static String getStringClaim(JWTClaimsSet claims, String name) {
-        try {
-            return claims.getStringClaim(name);
-        } catch (ParseException e) {
-            return null;
-        }
     }
 
     /**
@@ -306,7 +236,7 @@ public class PresenterController {
         model.addAttribute("statements", apiResponse.getStatements());
         model.addAttribute("individualUser", apiResponse.getIndividualUser());
         model.addAttribute("transactionId", transactionId);
-        addTokenToModel(token, transactionId, request, model);
+        addTokenToModel(token, model);
         return TEMPLATE_STATEMENTS;
     }
 
@@ -333,8 +263,20 @@ public class PresenterController {
         }
 
         // Checked before patching so the transaction is not updated when we cannot send the user back.
-        JWTClaimsSet claims = verifyToken(token, transactionId, request);
-        String returnUrl = claims == null ? null : getStringClaim(claims, CLAIM_RETURN_URL);
+        JWTClaimsSet claims = JwtUtils.verifyToken(token, chsJwtSecret);
+
+        if (claims == null) {
+            LOGGER.errorRequest(request, "Null presenter token for transaction " + transactionId);
+            return ERROR_PAGE;
+        }
+
+        // Stops a token issued for one transaction being replayed against another
+        if (!transactionId.equals(getStringClaim(claims, CLAIM_TRANSACTION_ID))) {
+            LOGGER.errorRequest(request, "Presenter JWT rejected: transaction_id does not match transaction "
+                    + transactionId);
+            return null;
+        }
+        String returnUrl = getStringClaim(claims, CLAIM_RETURN_URL);
 
         if (returnUrl == null || returnUrl.isBlank()) {
             LOGGER.errorRequest(request, "No valid return_url in presenter token for transaction " + transactionId);
@@ -401,5 +343,22 @@ public class PresenterController {
             LOGGER.error("Unable to extract user ID from session", e);
         }
         return null;
+    }
+
+    /**
+     * Verifies the token and, if valid, adds it and its claims to the model so the page can
+     * display them and pass the token on. Returns the claims, or {@code null} if the token
+     * was not accepted.
+     */
+    private void addTokenToModel(String jwt, Model model) {
+        JWTClaimsSet claims = JwtUtils.verifyToken(jwt, chsJwtSecret);
+
+        if (claims != null) {
+            model.addAttribute(TOKEN_PARAM, jwt);
+            model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
+            model.addAttribute("returnUrl", getStringClaim(claims, CLAIM_RETURN_URL));
+            model.addAttribute("backUrl", getStringClaim(claims, CLAIM_BACK_URL));
+            model.addAttribute("lang", getStringClaim(claims, CLAIM_LANG));
+        }
     }
 }
