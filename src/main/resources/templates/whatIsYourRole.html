@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>What role are you today?</title>
+</head>
+<body>
+<div id="confirmation-main-content" layout:fragment="content">
+
+  <!--/*@thymesVar id="whatIsYourRole" type="uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole"*/-->
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <form id="what-is-your-role-form" th:action="@{${nextPagePath}}" method="get">
+        <input type="hidden" name="chs-user-id" th:value="${chsUserId}">
+        <input type="hidden" name="form-type" th:value="${formType}">
+        <div class="govuk-form-group">
+          <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+              <h1 class="govuk-fieldset__heading" id="what-is-your-role-heading">What role are you today?</h1>
+            </legend>
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item" th:each="role : ${whatIsYourRole.roles}">
+                <input class="govuk-radios__input" type="radio" name="role" required
+                       th:id="${'role-' + role.id}" th:value="${role.id}">
+                <label class="govuk-label govuk-radios__label" th:for="${'role-' + role.id}"
+                       th:text="${role.description}"></label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <button type="submit" class="govuk-button" id="what-is-your-role-continue" data-module="govuk-button">Continue</button>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
