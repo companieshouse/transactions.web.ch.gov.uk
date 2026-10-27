@@ -17,12 +17,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
+import uk.gov.companieshouse.transactions.web.exception.AcspNotLinkedException;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
+import uk.gov.companieshouse.transactions.web.exception.UnverifiedException;
 import uk.gov.companieshouse.transactions.web.model.presenter.IndividualUserDto;
-import uk.gov.companieshouse.transactions.web.model.presenter.PresenterApiError;
 import uk.gov.companieshouse.transactions.web.model.presenter.PresenterApiResponse;
-import uk.gov.companieshouse.transactions.web.model.presenter.PresenterType;
-import uk.gov.companieshouse.transactions.web.service.presenter.PresenterApiService;
+import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
@@ -53,7 +53,7 @@ public class PresenterControllerTests {
     private TransactionsService transactionsService;
 
     @Mock
-    private PresenterApiService presenterApiService;
+    private PresenterService presenterService;
 
     @Mock
     private SessionService sessionService;
@@ -176,8 +176,8 @@ public class PresenterControllerTests {
     void postPresenterTypeAcspSuccessRedirectsToStatements() throws Exception {
         Transaction transaction = buildTransaction();
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(transaction);
-        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
-                .thenReturn(new PresenterApiService.Success(buildApiResponse()));
+        when(presenterService.getStatements(anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(buildApiResponse());
 
         mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
                         .param("presenterType", "ACSP_OWNER"))
@@ -190,8 +190,8 @@ public class PresenterControllerTests {
     void postPresenterTypeAcspNotLinkedRedirectsToStopScreen() throws Exception {
         Transaction transaction = buildTransaction();
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(transaction);
-        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
-                .thenReturn(new PresenterApiService.Failure(PresenterApiError.ACSP_NOT_LINKED));
+        when(presenterService.getStatements(anyString(), anyString(), anyString(), any(), any()))
+                .thenThrow(AcspNotLinkedException.class);
 
         mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
                         .param("presenterType", "ACSP_OWNER"))
@@ -204,8 +204,8 @@ public class PresenterControllerTests {
     void postPresenterTypeIdentityNotVerifiedRedirectsToStopScreen() throws Exception {
         Transaction transaction = buildTransaction();
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(transaction);
-        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
-                .thenReturn(new PresenterApiService.Failure(PresenterApiError.IDENTITY_NOT_VERIFIED));
+        when(presenterService.getStatements(anyString(), anyString(), anyString(), any(), any()))
+                .thenThrow(UnverifiedException.class);
 
         mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
                         .param("presenterType", "COMPANY_OFFICER"))
@@ -252,8 +252,8 @@ public class PresenterControllerTests {
     void postPresenterTypeSuccessKeepsToken() throws Exception {
         String token = signedJwt(presenterClaims(TRANSACTION_ID));
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(buildTransaction());
-        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
-                .thenReturn(new PresenterApiService.Success(buildApiResponse()));
+        when(presenterService.getStatements(anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(buildApiResponse());
 
         mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
                         .param("presenterType", "ACSP_OWNER")
@@ -267,8 +267,8 @@ public class PresenterControllerTests {
     void postPresenterTypeFailureKeepsToken() throws Exception {
         String token = signedJwt(presenterClaims(TRANSACTION_ID));
         when(transactionsService.getTransaction(TRANSACTION_ID)).thenReturn(buildTransaction());
-        when(presenterApiService.call(anyString(), anyString(), anyString(), any(), any()))
-                .thenReturn(new PresenterApiService.Failure(PresenterApiError.ACSP_NOT_LINKED));
+        when(presenterService.getStatements(anyString(), anyString(), anyString(), any(), any()))
+                .thenThrow(AcspNotLinkedException.class);
 
         mockMvc.perform(post("/transaction/{id}/presenter", TRANSACTION_ID)
                         .param("presenterType", "ACSP_OWNER")

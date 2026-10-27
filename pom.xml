@@ -44,6 +44,7 @@
         <common-web-java.version>5.0.2</common-web-java.version>
         <java-session-handler.version>4.1.22</java-session-handler.version>
         <sdk-manager-java.version>3.0.15</sdk-manager-java.version>
+        <private-api-sdk-java.version>7.2.43</private-api-sdk-java.version>
         <structured-logging.version>3.0.57</structured-logging.version>
         <web-security-java.version>3.1.17</web-security-java.version>
 
@@ -229,7 +230,13 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>private-api-sdk-java</artifactId>
-            <version>unversioned</version>
+            <version>${private-api-sdk-java.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>api-sdk-java</artifactId>
+            <version>7.2.9</version>
         </dependency>
 
         <!-- Security dependencies -->

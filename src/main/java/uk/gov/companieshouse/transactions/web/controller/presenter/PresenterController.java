@@ -15,18 +15,18 @@ import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
+import uk.gov.companieshouse.transactions.web.exception.AcspNotLinkedException;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
-import uk.gov.companieshouse.transactions.web.model.presenter.PresenterApiError;
+import uk.gov.companieshouse.transactions.web.exception.UnverifiedException;
 import uk.gov.companieshouse.transactions.web.model.presenter.PresenterApiResponse;
 import uk.gov.companieshouse.transactions.web.model.presenter.PresenterType;
-import uk.gov.companieshouse.transactions.web.service.presenter.PresenterApiService;
+import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +93,7 @@ public class PresenterController {
     }
 
     private final TransactionsService transactionsService;
-    private final PresenterApiService presenterApiService;
+    private final PresenterService presenterService;
     private final SessionService sessionService;
     private final ObjectMapper objectMapper;
 
@@ -107,11 +107,11 @@ public class PresenterController {
     private String chsJwtSecret;
 
     public PresenterController(TransactionsService transactionsService,
-            PresenterApiService presenterApiService,
+                               PresenterService presenterService,
             SessionService sessionService,
             ObjectMapper objectMapper) {
         this.transactionsService = transactionsService;
-        this.presenterApiService = presenterApiService;
+        this.presenterService = presenterService;
         this.sessionService = sessionService;
         this.objectMapper = objectMapper;
     }
@@ -135,7 +135,21 @@ public class PresenterController {
 
         addTokenToModel(jwt, model);
 
-        model.addAttribute("presenterTypes", PresenterType.values());
+        // Retrieve transaction to get company number and derive form type.
+        Transaction transaction;
+        try {
+            transaction = transactionsService.getTransaction(transactionId);
+        } catch (ServiceException e) {
+            LOGGER.errorRequest(request, "Failed to retrieve transaction: " + e.getMessage(), e);
+            return ERROR_PAGE;
+        }
+
+        String formType = FORM_TYPE_MAP.getOrDefault(transaction.getDescription(), "UNKNOWN");
+        String chsUserId = getUserIdFromSession();
+
+        List<String> presenterTypes = presenterService.getPresenterTypes(chsUserId, formType);
+
+        model.addAttribute("presenterTypes", presenterTypes);
         model.addAttribute("transactionId", transactionId);
         return TEMPLATE_PRESENTER_TYPE;
     }
@@ -195,23 +209,16 @@ public class PresenterController {
         String formType = FORM_TYPE_MAP.getOrDefault(transaction.getDescription(), "UNKNOWN");
         String chsUserId = getUserIdFromSession();
 
-        PresenterApiService.PresenterApiResult result =
-                presenterApiService.call(transactionId, companyNumber, formType, chsUserId, presenterType);
-
-        if (result instanceof PresenterApiService.Success success) {
+        try {
+            PresenterApiResponse response = presenterService.getStatements(transactionId, companyNumber, formType, chsUserId, presenterType);
             Map<String, Object> session = sessionService.getSessionDataFromContext();
-            session.put(SESSION_API_RESPONSE, success.response());
+            session.put(SESSION_API_RESPONSE, response);
             return redirectToPresenterPage(transactionId, "/statements", token);
-        }
-
-        if (result instanceof PresenterApiService.Failure failure) {
-            if (failure.error() == PresenterApiError.ACSP_NOT_LINKED) {
-                return redirectToPresenterPage(transactionId, "/stop/acsp-not-linked", token);
-            }
+        } catch (AcspNotLinkedException e) {
+            return redirectToPresenterPage(transactionId, "/stop/acsp-not-linked", token);
+        } catch (UnverifiedException e) {
             return redirectToPresenterPage(transactionId, "/stop/not-verified", token);
         }
-
-        return ERROR_PAGE;
     }
 
     // -----------------------------------------------------------------------
