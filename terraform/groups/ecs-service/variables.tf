@@ -90,6 +90,12 @@ variable "service_scaleup_schedule" {
   default     = ""
 }
 
+variable "health_check_grace_period_seconds" {
+  type        = number
+  description = "The amount of time for the ECS service to start and the task to become healthy before considering the health check failed."
+  default     = 180
+}
+
 # ----------------------------------------------------------------------
 # Cloudwatch alerts
 # ----------------------------------------------------------------------
