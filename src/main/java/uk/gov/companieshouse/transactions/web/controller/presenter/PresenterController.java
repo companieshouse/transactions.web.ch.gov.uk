@@ -77,7 +77,7 @@ public class PresenterController {
     private static final String CLAIM_LANG = "lang";
 
     /** Template names. */
-    private static final String TEMPLATE_PRESENTER_TYPE = "presenter/presenterType";
+    private static final String WHAT_IS_YOUR_ROLE = "presenter/whatIsYourRole.html";
     private static final String TEMPLATE_STATEMENTS = "presenter/presenterStatements";
     private static final String TEMPLATE_STOP_NOT_ELIGIBLE = "presenter/stop/notEligible";
     private static final String TEMPLATE_STOP_ACSP_NOT_LINKED = "presenter/stop/acspNotLinked";
@@ -125,7 +125,7 @@ public class PresenterController {
      * and renders the filer-type selection screen. The token is ignored if its {@code transaction_id}
      * does not match the transaction in the path.
      */
-    @GetMapping
+    @GetMapping("what-is-your-role")
     public String getPresenterType(@PathVariable String transactionId,
             @RequestParam(value = TOKEN_PARAM, required = false) String jwt,
             HttpServletRequest request,
@@ -147,11 +147,17 @@ public class PresenterController {
         String formType = FORM_TYPE_MAP.getOrDefault(transaction.getDescription(), "UNKNOWN");
         String chsUserId = getUserIdFromSession();
 
-        List<String> presenterTypes = presenterService.getPresenterTypes(chsUserId, formType);
+        List<String> presenterTypes;
+        try {
+            presenterTypes = presenterService.getPresenterTypes(chsUserId, formType);
+        } catch (Exception e) {
+            LOGGER.errorRequest(request, "Failed to retrieve presenter types: " + e.getMessage(), e);
+            return ERROR_PAGE;
+        }
 
         model.addAttribute("presenterTypes", presenterTypes);
         model.addAttribute("transactionId", transactionId);
-        return TEMPLATE_PRESENTER_TYPE;
+        return WHAT_IS_YOUR_ROLE;
     }
 
     /**
@@ -172,7 +178,7 @@ public class PresenterController {
     /**
      * Handles the filer-type form submission.
      */
-    @PostMapping
+    @PostMapping("what-is-your-role")
     public String postPresenterType(@PathVariable String transactionId,
             @RequestParam(value = "presenterType", required = false) String presenterTypeParam,
             @RequestParam(value = TOKEN_PARAM, required = false) String token,
