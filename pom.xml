@@ -268,7 +268,8 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>private-api-sdk-java</artifactId>
-            <version>${private-api-sdk-java.version}</version>
+<!--            <version>${private-api-sdk-java.version}</version>-->
+            <version>unversioned</version>
         </dependency>
 
         <dependency>
