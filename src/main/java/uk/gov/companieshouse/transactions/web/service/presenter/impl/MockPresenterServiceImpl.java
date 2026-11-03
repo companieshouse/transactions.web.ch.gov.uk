@@ -10,7 +10,7 @@ import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService
 
 import java.util.List;
 
-@Service
+//@Service
 public class MockPresenterServiceImpl implements PresenterService {
 
     @Override

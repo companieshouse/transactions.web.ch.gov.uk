@@ -18,7 +18,7 @@ import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService
 
 import java.util.List;
 
-//@Service
+@Service
 public class PresenterServiceImpl implements PresenterService {
 
     PresenterDetailsRequestApi detailsApi;

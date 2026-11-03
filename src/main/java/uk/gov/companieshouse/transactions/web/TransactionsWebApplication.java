@@ -42,9 +42,4 @@ public class TransactionsWebApplication implements WebMvcConfigurer {
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
 	}
-
-	@Bean
-	public PresenterService presenterService() {
-		return new MockPresenterServiceImpl();
-	}
 }
