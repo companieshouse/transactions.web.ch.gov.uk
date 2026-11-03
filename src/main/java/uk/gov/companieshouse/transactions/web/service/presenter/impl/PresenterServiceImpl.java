@@ -21,12 +21,9 @@ import java.util.List;
 @Service
 public class PresenterServiceImpl implements PresenterService {
 
-    @Autowired
     PresenterDetailsRequestApi detailsApi;
-    @Autowired
     PresenterTypeRequestApi typeApi;
 
-    @Autowired
     public PresenterServiceImpl(PresenterDetailsRequestApi detailsApi, PresenterTypeRequestApi typeApi) {
         this.detailsApi = detailsApi;
         this.typeApi = typeApi;
