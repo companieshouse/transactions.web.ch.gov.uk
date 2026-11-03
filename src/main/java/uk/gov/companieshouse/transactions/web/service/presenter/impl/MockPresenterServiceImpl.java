@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.transactions.web.service.presenter.impl;
 
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.transactions.web.exception.AcspNotLinkedException;
 import uk.gov.companieshouse.transactions.web.exception.UnverifiedException;
 import uk.gov.companieshouse.transactions.web.model.presenter.IndividualUserDto;
@@ -11,7 +9,6 @@ import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService
 
 import java.util.List;
 
-@Component
 public class MockPresenterServiceImpl implements PresenterService {
     @Override
     public List<String> getPresenterTypes(String chsUserId, String formType) throws Exception {
