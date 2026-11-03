@@ -112,7 +112,7 @@ public class PresenterController {
             SessionService sessionService,
             ObjectMapper objectMapper) {
         this.transactionsService = transactionsService;
-        this.presenterService = new MockPresenterServiceImpl();
+        this.presenterService = presenterService;
         this.sessionService = sessionService;
         this.objectMapper = objectMapper;
     }
