@@ -52,7 +52,6 @@ import static uk.gov.companieshouse.transactions.web.controller.presenter.JwtUti
  */
 @Controller
 @RequestMapping("/transaction/{transactionId}/presenter")
-@ComponentScan
 public class PresenterController {
 
     private static final Logger LOGGER =
