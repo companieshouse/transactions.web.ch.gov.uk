@@ -2,6 +2,7 @@ package uk.gov.companieshouse.transactions.web.controller.presenter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,7 @@ import static uk.gov.companieshouse.transactions.web.controller.presenter.JwtUti
  */
 @Controller
 @RequestMapping("/transaction/{transactionId}/presenter")
+@ComponentScan
 public class PresenterController {
 
     private static final Logger LOGGER =

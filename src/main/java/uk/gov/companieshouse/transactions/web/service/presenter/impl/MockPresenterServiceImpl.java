@@ -13,9 +13,6 @@ import java.util.List;
 @Service
 public class MockPresenterServiceImpl implements PresenterService {
 
-    public MockPresenterServiceImpl() {
-    }
-
     @Override
     public List<String> getPresenterTypes(String chsUserId, String formType) throws Exception {
         return List.of();
