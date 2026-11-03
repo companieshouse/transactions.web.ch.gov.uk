@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.transactions.web.service.presenter.impl;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.presenters.api.PresenterDetailsRequestApi;
 import uk.gov.companieshouse.api.presenters.api.PresenterTypeRequestApi;
 import uk.gov.companieshouse.api.presenters.model.Acsp;
@@ -16,6 +17,7 @@ import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService
 
 import java.util.List;
 
+@Service
 public class PresenterServiceImpl implements PresenterService {
 
     PresenterDetailsRequestApi detailsApi;
