@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/baseLayout}" lang="en">
+
+<head>
+  <title>Confirm Statement</title>
+</head>
+
+<body>
+  <div id="confirmation-main-content" layout:fragment="content">
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <form id="statement-confirm-form" th:action="@{${nextPagePath}}" method="get">
+          <input type="hidden" name="chs-user-id" th:value="${chsUserId}">
+          <input type="hidden" name="form-type" th:value="${formType}">
+          <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset">
+              <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <h1 class="govuk-fieldset__legend govuk-fieldset__legend--l">Confirm Statements</h1>
+              </legend>
+              <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                <div class="govuk-checkboxes__item" th:each="statement, stat : ${statements}">
+                  <input class="govuk-checkboxes__input" type="checkbox" name="selectedStatements"
+                    th:id="${'statement-' + stat.index}" th:value="${statement.id}" />
+                  <label class="govuk-label govuk-checkboxes__label" th:for="${'statement-' + stat.index}"
+                    th:text="${statement.statementText}">Statement</label>
+                </div>
+              </div>
+              <button type="submit" class="govuk-button" id="confirm-statement-continue"
+                data-module="govuk-button">Submit</button>
+            </fieldset>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
