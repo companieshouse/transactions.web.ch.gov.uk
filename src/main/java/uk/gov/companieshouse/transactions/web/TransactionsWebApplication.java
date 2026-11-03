@@ -9,6 +9,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.companieshouse.transactions.web.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.transactions.web.interceptor.UserDetailsInterceptor;
+import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService;
+import uk.gov.companieshouse.transactions.web.service.presenter.impl.MockPresenterServiceImpl;
 
 @SpringBootApplication
 public class TransactionsWebApplication implements WebMvcConfigurer {
@@ -39,5 +41,10 @@ public class TransactionsWebApplication implements WebMvcConfigurer {
 	@Bean
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
+	}
+
+	@Bean
+	public PresenterService presenterService() {
+		return new MockPresenterServiceImpl();
 	}
 }
