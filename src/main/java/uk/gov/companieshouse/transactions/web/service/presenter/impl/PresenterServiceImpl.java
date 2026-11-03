@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.service.presenter.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.presenters.api.PresenterDetailsRequestApi;
@@ -23,6 +24,7 @@ public class PresenterServiceImpl implements PresenterService {
     PresenterDetailsRequestApi detailsApi;
     PresenterTypeRequestApi typeApi;
 
+    @Autowired
     public PresenterServiceImpl(PresenterDetailsRequestApi detailsApi, PresenterTypeRequestApi typeApi) {
         this.detailsApi = detailsApi;
         this.typeApi = typeApi;
