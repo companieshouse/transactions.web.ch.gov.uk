@@ -21,7 +21,6 @@ import uk.gov.companieshouse.transactions.web.exception.UnverifiedException;
 import uk.gov.companieshouse.transactions.web.model.presenter.PresenterApiResponse;
 import uk.gov.companieshouse.transactions.web.model.presenter.PresenterType;
 import uk.gov.companieshouse.transactions.web.service.presenter.PresenterService;
-import uk.gov.companieshouse.transactions.web.service.presenter.impl.MockPresenterServiceImpl;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
@@ -94,7 +93,7 @@ public class PresenterController {
     }
 
     private final TransactionsService transactionsService;
-    private final MockPresenterServiceImpl presenterService;
+    private final PresenterService presenterService;
     private final SessionService sessionService;
     private final ObjectMapper objectMapper;
 
@@ -108,7 +107,7 @@ public class PresenterController {
     private String chsJwtSecret;
 
     public PresenterController(TransactionsService transactionsService,
-                               MockPresenterServiceImpl presenterService,
+                               PresenterService presenterService,
             SessionService sessionService,
             ObjectMapper objectMapper) {
         this.transactionsService = transactionsService;
