@@ -13,7 +13,6 @@ import java.io.PrintStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +62,7 @@ public class LoggingInterceptorTests {
     public void postHandle() {
         when(session.getAttribute(LogContextProperties.START_TIME_KEY.value()))
                 .thenReturn(System.currentTimeMillis());
-        when(httpServletResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
+        when(httpServletResponse.getStatus()).thenReturn(httpServletResponse.SC_OK);
         loggingInterceptor.postHandle(httpServletRequest, httpServletResponse, new Object(),
                 new ModelAndView());
         verify(session, times(1)).getAttribute(LogContextProperties.START_TIME_KEY.value());
