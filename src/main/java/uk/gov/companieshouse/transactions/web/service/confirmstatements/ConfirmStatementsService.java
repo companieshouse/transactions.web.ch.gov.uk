@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.transactions.web.service.confirmstatements;
 
-import uk.gov.companieshouse.service.ServiceException;
+import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statements.Statements;
 
 public interface ConfirmStatementsService {
