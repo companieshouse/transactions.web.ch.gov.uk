@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -9,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.PlainJWT;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +35,10 @@ class WhatIsYourRoleControllerTests {
 
     private static final String FORM_TYPE = "AD01";
 
+    private static final String TRANSACTION_ID = "123456-654321-123456";
+
+    private static final String TOKEN = new PlainJWT(claims()).serialize();
+
     private MockMvc mockMvc;
 
     @Mock
@@ -52,11 +59,13 @@ class WhatIsYourRoleControllerTests {
         List<PresenterType> presenterTypes = List.of(new PresenterType("id", "Description"));
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE)).thenReturn(presenterTypes);
 
-        MvcResult result = mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        MvcResult result = mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(view().name("whatIsYourRole"))
+                .andExpect(model().attribute("token", TOKEN))
                 .andExpect(model().attribute("chsUserId", USER_ID))
                 .andExpect(model().attribute("formType", FORM_TYPE))
+                .andExpect(model().attribute("transactionId", TRANSACTION_ID))
                 .andExpect(model().attribute("nextPagePath", NEXT_PAGE_PATH))
                 .andExpect(model().attribute("templateName", "whatIsYourRole"))
                 .andReturn();
@@ -75,16 +84,31 @@ class WhatIsYourRoleControllerTests {
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE))
                 .thenThrow(new ServiceException("error"));
 
-        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
     }
 
     @Test
-    @DisplayName("GET without the required params returns bad request")
-    void getWithoutParams() throws Exception {
+    @DisplayName("GET without a token returns bad request")
+    void getWithoutToken() throws Exception {
 
-        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH))
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET with an unreadable token returns the error view")
+    void getWithUnreadableToken() throws Exception {
+
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", "not-a-jwt"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(presenterTypesService);
+    }
+
+    private static JWTClaimsSet claims() {
+        return new JWTClaimsSet.Builder().claim("chs-user-id", USER_ID).claim("form-type", FORM_TYPE).build();
     }
 }

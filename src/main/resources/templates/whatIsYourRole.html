@@ -14,8 +14,7 @@
     <div class="govuk-grid-column-two-thirds">
 
       <form id="what-is-your-role-form" th:action="@{${nextPagePath}}" method="get">
-        <input type="hidden" name="chs-user-id" th:value="${chsUserId}">
-        <input type="hidden" name="form-type" th:value="${formType}">
+        <input type="hidden" name="token" th:value="${token}">
         <div class="govuk-form-group">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

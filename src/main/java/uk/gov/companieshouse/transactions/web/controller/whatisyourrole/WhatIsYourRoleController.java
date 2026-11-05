@@ -3,11 +3,15 @@ package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import java.text.ParseException;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +36,12 @@ public class WhatIsYourRoleController {
 
     private static final String TEMPLATE_NAME = "whatIsYourRole";
 
+    private static final String TOKEN_PARAM = "token";
+
+    private static final String CLAIM_CHS_USER_ID = "chs-user-id";
+
+    private static final String CLAIM_FORM_TYPE = "form-type";
+
     private final PresenterTypesService presenterTypesService;
 
     public WhatIsYourRoleController(PresenterTypesService presenterTypesService) {
@@ -39,21 +49,30 @@ public class WhatIsYourRoleController {
     }
 
     @GetMapping
-    public String getWhatIsYourRole(@RequestParam("chs-user-id") String chsUserId,
-                                    @RequestParam("form-type") String formType,
+    public String getWhatIsYourRole(@PathVariable("transactionId") String transactionId,
+                                    @RequestParam(value = TOKEN_PARAM, required = true) String token,
                                     @RequestHeader(value = "X-Request-Id", required = false) String xRequestId,
                                     Model model) {
 
-        DataMap whatIsYourRoleDataMap = new DataMap.Builder().chsUserId(chsUserId).build();
+        JWTClaimsSet claims = addTokenToModel(token, model);
 
-        LOG.infoContext(xRequestId, "What is your role request received for form type " + formType, whatIsYourRoleDataMap.getLogMap());
+        if (claims == null) {
+            LOG.errorContext(xRequestId, "What is your role request received with a missing or malformed token", null, null);
+            return ERROR_PAGE;
+        }
+
+        String chsUserId = getStringClaim(claims, CLAIM_CHS_USER_ID);
+        String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
+
+        DataMap whatIsYourRoleDataMap = new DataMap.Builder().chsUserId(chsUserId).transactionId(transactionId).build();
+
+        LOG.infoContext(xRequestId, "What is your role request received for transaction " + transactionId + " and form type " + formType, whatIsYourRoleDataMap.getLogMap());
 
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
 
             model.addAttribute("whatIsYourRole", toWhatIsYourRole(presenterTypes));
-            model.addAttribute("chsUserId", chsUserId);
-            model.addAttribute("formType", formType);
+            model.addAttribute("transactionId", transactionId);
             model.addAttribute("nextPagePath", NEXT_PAGE_PATH);
 
             return getTemplateName();
@@ -63,6 +82,40 @@ public class WhatIsYourRoleController {
             LOG.errorContext(xRequestId, ex.getMessage(), ex, whatIsYourRoleDataMap.getLogMap());
             return ERROR_PAGE;
         }
+    }
+
+    /**
+     * Reads the token and, if it can be read, adds it and its claims to the model so the page can
+     * display them and pass the token on. Returns the claims, or {@code null} if the token
+     * could not be read. The token is not verified here.
+     */
+    private JWTClaimsSet addTokenToModel(String token, Model model) {
+        JWTClaimsSet claims = readClaims(token);
+
+        if (claims != null) {
+            model.addAttribute(TOKEN_PARAM, token);
+            model.addAttribute("chsUserId", getStringClaim(claims, CLAIM_CHS_USER_ID));
+            model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
+        }
+
+        return claims;
+    }
+
+    private JWTClaimsSet readClaims(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+
+        try {
+            return JWTParser.parse(token).getJWTClaimsSet();
+        } catch (ParseException ex) {
+            return null;
+        }
+    }
+
+    private String getStringClaim(JWTClaimsSet claims, String name) {
+        Object value = claims.getClaim(name);
+        return value instanceof String string ? string : null;
     }
 
     private WhatIsYourRole toWhatIsYourRole(List<PresenterType> presenterTypes) {
