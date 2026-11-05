@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -15,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.presentertype.PresenterType;
 import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole;
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
-import uk.gov.companieshouse.transactions.web.service.whatisyourrole.WhatIsYourRoleService;
 
 @ExtendWith(MockitoExtension.class)
 class WhatIsYourRoleControllerTests {
@@ -36,9 +37,6 @@ class WhatIsYourRoleControllerTests {
     @Mock
     private PresenterTypesService presenterTypesService;
 
-    @Mock
-    private WhatIsYourRoleService whatIsYourRoleService;
-
     @InjectMocks
     private WhatIsYourRoleController controller;
 
@@ -52,18 +50,22 @@ class WhatIsYourRoleControllerTests {
     void getWhatIsYourRole() throws Exception {
 
         List<PresenterType> presenterTypes = List.of(new PresenterType("id", "Description"));
-        WhatIsYourRole whatIsYourRole = new WhatIsYourRole();
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE)).thenReturn(presenterTypes);
-        when(whatIsYourRoleService.getWhatIsYourRole(presenterTypes)).thenReturn(whatIsYourRole);
 
-        mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        MvcResult result = mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
                 .andExpect(status().isOk())
                 .andExpect(view().name("whatIsYourRole"))
-                .andExpect(model().attribute("whatIsYourRole", whatIsYourRole))
                 .andExpect(model().attribute("chsUserId", USER_ID))
                 .andExpect(model().attribute("formType", FORM_TYPE))
                 .andExpect(model().attribute("nextPagePath", "/transaction/next-page"))
-                .andExpect(model().attribute("templateName", "whatIsYourRole"));
+                .andExpect(model().attribute("templateName", "whatIsYourRole"))
+                .andReturn();
+
+        WhatIsYourRole whatIsYourRole =
+                (WhatIsYourRole) result.getModelAndView().getModel().get("whatIsYourRole");
+        assertEquals(1, whatIsYourRole.getRoles().size());
+        assertEquals("id", whatIsYourRole.getRoles().get(0).getId());
+        assertEquals("Description", whatIsYourRole.getRoles().get(0).getDescription());
     }
 
     @Test

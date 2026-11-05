@@ -14,8 +14,9 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.presentertype.PresenterType;
+import uk.gov.companieshouse.transactions.web.model.whatisyourrole.Role;
+import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole;
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
-import uk.gov.companieshouse.transactions.web.service.whatisyourrole.WhatIsYourRoleService;
 
 @Controller
 @RequestMapping("/transaction/what-is-your-role")
@@ -32,12 +33,9 @@ public class WhatIsYourRoleController {
     private static final String NEXT_PAGE_PATH = "/transaction/next-page";
 
     private final PresenterTypesService presenterTypesService;
-    private final WhatIsYourRoleService whatIsYourRoleService;
 
-    public WhatIsYourRoleController(PresenterTypesService presenterTypesService,
-                                    WhatIsYourRoleService whatIsYourRoleService) {
+    public WhatIsYourRoleController(PresenterTypesService presenterTypesService) {
         this.presenterTypesService = presenterTypesService;
-        this.whatIsYourRoleService = whatIsYourRoleService;
     }
 
     @GetMapping
@@ -52,7 +50,7 @@ public class WhatIsYourRoleController {
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
 
-            model.addAttribute("whatIsYourRole", whatIsYourRoleService.getWhatIsYourRole(presenterTypes));
+            model.addAttribute("whatIsYourRole", toWhatIsYourRole(presenterTypes));
             model.addAttribute("chsUserId", chsUserId);
             model.addAttribute("formType", formType);
             model.addAttribute("nextPagePath", NEXT_PAGE_PATH);
@@ -64,6 +62,14 @@ public class WhatIsYourRoleController {
             LOGGER.errorRequest(request, ex.getMessage(), ex);
             return ERROR_PAGE;
         }
+    }
+
+    private WhatIsYourRole toWhatIsYourRole(List<PresenterType> presenterTypes) {
+        WhatIsYourRole result = new WhatIsYourRole();
+        result.setRoles(presenterTypes.stream()
+                .map(type -> new Role(type.getId(), type.getDescription()))
+                .toList());
+        return result;
     }
 
     @ModelAttribute("templateName")
