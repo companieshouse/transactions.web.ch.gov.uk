@@ -3,17 +3,17 @@ package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
 
-import java.util.HashMap;
 import java.util.List;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.presentertype.PresenterType;
@@ -25,7 +25,7 @@ import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTyp
 @RequestMapping(WHAT_IS_YOUR_ROLE_PATH)
 public class WhatIsYourRoleController {
 
-    private static final Logger LOGGER =
+    private static final Logger LOG =
             LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
 
     private static final String ERROR_PAGE = "error";
@@ -41,11 +41,12 @@ public class WhatIsYourRoleController {
     @GetMapping
     public String getWhatIsYourRole(@RequestParam("chs-user-id") String chsUserId,
                                     @RequestParam("form-type") String formType,
-                                    HttpServletRequest request,
+                                    @RequestHeader(value = "X-Request-Id", required = false) String xRequestId,
                                     Model model) {
 
-        LOGGER.infoRequest(request, "What is your role request received for form type " + formType,
-                new HashMap<>());
+        DataMap whatIsYourRoleDataMap = new DataMap.Builder().chsUserId(chsUserId).build();
+
+        LOG.infoContext(xRequestId, "What is your role request received for form type " + formType, whatIsYourRoleDataMap.getLogMap());
 
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
@@ -59,7 +60,7 @@ public class WhatIsYourRoleController {
 
         } catch (ServiceException ex) {
 
-            LOGGER.errorRequest(request, ex.getMessage(), ex);
+            LOG.errorContext(xRequestId, ex.getMessage(), ex, whatIsYourRoleDataMap.getLogMap());
             return ERROR_PAGE;
         }
     }
