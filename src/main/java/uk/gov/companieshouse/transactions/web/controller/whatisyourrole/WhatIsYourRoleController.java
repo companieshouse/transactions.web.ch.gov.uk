@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
+import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
+
 import java.util.HashMap;
 import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +22,7 @@ import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRol
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
 
 @Controller
-@RequestMapping("/transaction/what-is-your-role")
+@RequestMapping(WHAT_IS_YOUR_ROLE_PATH)
 public class WhatIsYourRoleController {
 
     private static final Logger LOGGER =
@@ -28,9 +31,6 @@ public class WhatIsYourRoleController {
     private static final String ERROR_PAGE = "error";
 
     private static final String TEMPLATE_NAME = "whatIsYourRole";
-
-    // Placeholder until the path of the next page in the journey is known
-    private static final String NEXT_PAGE_PATH = "/transaction/next-page";
 
     private final PresenterTypesService presenterTypesService;
 

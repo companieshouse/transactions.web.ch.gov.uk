@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +27,6 @@ import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTyp
 
 @ExtendWith(MockitoExtension.class)
 class WhatIsYourRoleControllerTests {
-
-    private static final String PATH = "/transaction/what-is-your-role";
 
     private static final String USER_ID = "1234";
 
@@ -52,12 +52,12 @@ class WhatIsYourRoleControllerTests {
         List<PresenterType> presenterTypes = List.of(new PresenterType("id", "Description"));
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE)).thenReturn(presenterTypes);
 
-        MvcResult result = mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        MvcResult result = mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
                 .andExpect(status().isOk())
                 .andExpect(view().name("whatIsYourRole"))
                 .andExpect(model().attribute("chsUserId", USER_ID))
                 .andExpect(model().attribute("formType", FORM_TYPE))
-                .andExpect(model().attribute("nextPagePath", "/transaction/next-page"))
+                .andExpect(model().attribute("nextPagePath", NEXT_PAGE_PATH))
                 .andExpect(model().attribute("templateName", "whatIsYourRole"))
                 .andReturn();
 
@@ -75,7 +75,7 @@ class WhatIsYourRoleControllerTests {
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE))
                 .thenThrow(new ServiceException("error"));
 
-        mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
     }
@@ -84,7 +84,7 @@ class WhatIsYourRoleControllerTests {
     @DisplayName("GET without the required params returns bad request")
     void getWithoutParams() throws Exception {
 
-        mockMvc.perform(get(PATH))
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH))
                 .andExpect(status().isBadRequest());
     }
 }
