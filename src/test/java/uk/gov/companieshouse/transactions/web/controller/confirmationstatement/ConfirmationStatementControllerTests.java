@@ -20,8 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
-import uk.gov.companieshouse.transactions.web.model.statements.Statements;
-import uk.gov.companieshouse.transactions.web.model.statements.Statement;
+import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +47,7 @@ public class ConfirmationStatementControllerTests {
     @Test
     @DisplayName("GET returns the page with a list of statements from the last page")
     void getConfirmStatement() throws Exception {
-        Statements mockedStatements = new Statements(List.of(new Statement("id", "statementText")));
+        List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
 
         mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))

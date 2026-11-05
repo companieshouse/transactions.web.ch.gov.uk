@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
 import java.util.HashMap;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -14,7 +15,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
-import uk.gov.companieshouse.transactions.web.model.statements.Statements;
+import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
 
 @Controller
@@ -42,7 +43,7 @@ public class ConfirmStatementsController {
             HttpServletRequest request,
             Model model) {
         LOGGER.infoRequest(request, "Confirm Statements Page GET Request", new HashMap<>());
-        Statements confirmStatements;
+        List<Statement> confirmStatements;
 
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserID);
@@ -53,7 +54,7 @@ public class ConfirmStatementsController {
         model.addAttribute("nextPagePath", NEXT_PAGE);
         model.addAttribute("chsUserId", chsUserID);
         model.addAttribute("formType", formType);
-        model.addAttribute("statements", confirmStatements.getStatementList());
+        model.addAttribute("statements", confirmStatements);
         return getTemplateName();
     }
 

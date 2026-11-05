@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.transactions.web.model.statements;
+package uk.gov.companieshouse.transactions.web.model.statement;
 
 public class Statement {
     public String id;

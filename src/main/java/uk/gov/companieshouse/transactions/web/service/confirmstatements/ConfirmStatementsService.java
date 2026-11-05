@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.transactions.web.service.confirmstatements;
 
+import java.util.List;
+
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
-import uk.gov.companieshouse.transactions.web.model.statements.Statements;
+import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 
 public interface ConfirmStatementsService {
-    Statements getConfirmStatements(String chsUserID) throws ServiceException;
+    List<Statement> getConfirmStatements(String chsUserID) throws ServiceException;
 }
