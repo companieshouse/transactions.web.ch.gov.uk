@@ -8,7 +8,7 @@ locals {
   docker_repo                 = "transactions.web.ch.gov.uk"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 92
-  lb_listener_paths           = ["/transaction/*/confirmation"]
+  lb_listener_paths           = ["/transaction/*/confirmation", "/transaction/*/presenter/*"]
   healthcheck_path            = "/transaction/healthcheck"
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
