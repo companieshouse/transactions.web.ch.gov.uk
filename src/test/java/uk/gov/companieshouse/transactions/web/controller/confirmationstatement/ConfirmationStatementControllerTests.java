@@ -18,6 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.PlainJWT;
+
+import uk.gov.companieshouse.transactions.presenters.PresenterUrlConstants;
+
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
@@ -25,11 +30,13 @@ import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmS
 
 @ExtendWith(MockitoExtension.class)
 public class ConfirmationStatementControllerTests {
-    private static final String PATH = "/transaction/confirm";
 
     private static final String USER_ID = "0010";
 
     private static final String FORM_TYPE = "AA01";
+
+    private static final String TRANSACTION_ID = "123456-654321-123456";
+    private static final String TOKEN = new PlainJWT(claims()).serialize();
 
     private MockMvc mockMvc;
 
@@ -50,25 +57,45 @@ public class ConfirmationStatementControllerTests {
         List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
 
-        mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
+        mockMvc.perform(get(
+                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk()).andExpect(view().name("confirmStatement"))
-                .andExpect(model().attribute("chsUserId", USER_ID)).andExpect(model().attribute("formType", FORM_TYPE))
-                .andExpect(model().attribute("nextPagePath", "transaction/next-page"))
+                .andExpect(model().attribute("token", TOKEN))
+                .andExpect(model().attribute("nextPagePath", "next/page"))
                 .andExpect(model().attribute("templateName", "confirmStatement"));
+
     }
 
     @Test
     @DisplayName("GET returns an error page if statements to confirm can't be retrieved")
     void getConfirmStatementError() throws Exception {
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenThrow(new ServiceException("some error"));
-        mockMvc.perform(get(PATH).param("chs-user-id", USER_ID).param("form-type", FORM_TYPE))
-                .andExpect(status().isOk()).andExpect(view().name("error"));
+        mockMvc.perform(get(
+                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
     }
 
     @Test
-    @DisplayName("GET throws a bad request if no params listed")
+    @DisplayName("GET throws a bad request if no token provided")
     void getBadRequest() throws Exception {
-        mockMvc.perform(get(PATH)).andExpect(status().isBadRequest());
+        mockMvc.perform(get(
+                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                TRANSACTION_ID)).andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("GET returns the error page if the JWT is invalid")
+    void getJWTInvalidError() throws Exception {
+        mockMvc.perform(get(
+                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                TRANSACTION_ID).param("token", "not-a-valid-jwtoken"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+    }
+
+    private static JWTClaimsSet claims() {
+        return new JWTClaimsSet.Builder().claim("chs-user-id", USER_ID).claim("form-type", FORM_TYPE).build();
+    }
 }
