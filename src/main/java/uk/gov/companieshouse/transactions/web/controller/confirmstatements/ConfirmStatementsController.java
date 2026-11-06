@@ -17,17 +17,15 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsConstants;
 
 @Controller
-@RequestMapping("/transaction/confirm")
+@RequestMapping(ConfirmStatementsConstants.CONFIRM_STATEMENTS_PATH)
 public class ConfirmStatementsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
 
     private static final String ERROR_PAGE = "error";
-
-    // Placeholder until we have the next page path
-    private static final String NEXT_PAGE = "transaction/next-page";
 
     private final ConfirmStatementsService confirmStatementsService;
 
@@ -51,7 +49,7 @@ public class ConfirmStatementsController {
             LOGGER.errorRequest(request, e);
             return ERROR_PAGE;
         }
-        model.addAttribute("nextPagePath", NEXT_PAGE);
+        model.addAttribute("nextPagePath", ConfirmStatementsConstants.NEXT_PAGE_PATH);
         model.addAttribute("chsUserId", chsUserID);
         model.addAttribute("formType", formType);
         model.addAttribute("statements", confirmStatements);
