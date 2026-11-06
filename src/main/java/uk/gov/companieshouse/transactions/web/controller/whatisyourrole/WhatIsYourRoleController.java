@@ -1,12 +1,13 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
-import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
-import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import uk.gov.companieshouse.transactions.web.model.presentertype.PresenterType;
 import uk.gov.companieshouse.transactions.web.model.whatisyourrole.Role;
 import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole;
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @Controller
 @RequestMapping(WHAT_IS_YOUR_ROLE_PATH)
@@ -38,14 +40,16 @@ public class WhatIsYourRoleController {
 
     private static final String TOKEN_PARAM = "token";
 
-    private static final String CLAIM_CHS_USER_ID = "chs-user-id";
-
     private static final String CLAIM_FORM_TYPE = "form-type";
 
     private final PresenterTypesService presenterTypesService;
 
-    public WhatIsYourRoleController(PresenterTypesService presenterTypesService) {
+    private final SessionService sessionService;
+
+    public WhatIsYourRoleController(PresenterTypesService presenterTypesService,
+                                    SessionService sessionService) {
         this.presenterTypesService = presenterTypesService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping
@@ -61,8 +65,13 @@ public class WhatIsYourRoleController {
             return ERROR_PAGE;
         }
 
-        String chsUserId = getStringClaim(claims, CLAIM_CHS_USER_ID);
+        String chsUserId = getUserIdFromSession();
         String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
+
+        if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
+            LOG.errorContext(xRequestId, "What is your role request received without a user id in the session or a transaction id", null, null);
+            return ERROR_PAGE;
+        }
 
         DataMap whatIsYourRoleDataMap = new DataMap.Builder().chsUserId(chsUserId).transactionId(transactionId).build();
 
@@ -94,11 +103,28 @@ public class WhatIsYourRoleController {
 
         if (claims != null) {
             model.addAttribute(TOKEN_PARAM, token);
-            model.addAttribute("chsUserId", getStringClaim(claims, CLAIM_CHS_USER_ID));
             model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
         }
 
         return claims;
+    }
+
+    private String getUserIdFromSession() {
+        Map<String, Object> sessionData = sessionService.getSessionDataFromContext();
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> signInInfo = (Map<String, Object>) sessionData.get("signin_info");
+            if (signInInfo != null) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> userProfile = (Map<String, Object>) signInInfo.get("user_profile");
+                if (userProfile != null) {
+                    return (String) userProfile.get("id");
+                }
+            }
+        } catch (ClassCastException e) {
+            LOG.error("Unable to extract user ID from session", e);
+        }
+        return null;
     }
 
     private JWTClaimsSet readClaims(String token) {

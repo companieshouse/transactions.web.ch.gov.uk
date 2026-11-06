@@ -7,12 +7,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.NEXT_PAGE_PATH;
-import static uk.gov.companieshouse.transactions.web.controller.whatisyourrole.WhatIsYourRoleConstants.WHAT_IS_YOUR_ROLE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.presentertype.PresenterType;
 import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole;
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 class WhatIsYourRoleControllerTests {
@@ -44,6 +47,9 @@ class WhatIsYourRoleControllerTests {
     @Mock
     private PresenterTypesService presenterTypesService;
 
+    @Mock
+    private SessionService sessionService;
+
     @InjectMocks
     private WhatIsYourRoleController controller;
 
@@ -56,6 +62,7 @@ class WhatIsYourRoleControllerTests {
     @DisplayName("GET returns the what is your role view with the model")
     void getWhatIsYourRole() throws Exception {
 
+        givenSessionUserId(USER_ID);
         List<PresenterType> presenterTypes = List.of(new PresenterType("id", "Description"));
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE)).thenReturn(presenterTypes);
 
@@ -63,7 +70,6 @@ class WhatIsYourRoleControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(view().name("whatIsYourRole"))
                 .andExpect(model().attribute("token", TOKEN))
-                .andExpect(model().attribute("chsUserId", USER_ID))
                 .andExpect(model().attribute("formType", FORM_TYPE))
                 .andExpect(model().attribute("transactionId", TRANSACTION_ID))
                 .andExpect(model().attribute("nextPagePath", NEXT_PAGE_PATH))
@@ -81,6 +87,7 @@ class WhatIsYourRoleControllerTests {
     @DisplayName("GET returns the error view if the presenter types cannot be retrieved")
     void getWhatIsYourRoleServiceException() throws Exception {
 
+        givenSessionUserId(USER_ID);
         when(presenterTypesService.getPresenterTypes(USER_ID, FORM_TYPE))
                 .thenThrow(new ServiceException("error"));
 
@@ -108,7 +115,54 @@ class WhatIsYourRoleControllerTests {
         verifyNoInteractions(presenterTypesService);
     }
 
+    @Test
+    @DisplayName("GET with no signed-in user in the session returns the error view")
+    void getWithNoUserInSession() throws Exception {
+
+        when(sessionService.getSessionDataFromContext()).thenReturn(new HashMap<>());
+
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(presenterTypesService);
+    }
+
+    @Test
+    @DisplayName("GET with malformed session data returns the error view")
+    void getWithMalformedSession() throws Exception {
+
+        Map<String, Object> sessionData = new HashMap<>();
+        sessionData.put("signin_info", "not-a-map");
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(presenterTypesService);
+    }
+
+    @Test
+    @DisplayName("GET with a blank transaction id returns the error view")
+    void getWithBlankTransactionId() throws Exception {
+
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, " ").param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(presenterTypesService);
+    }
+
+    private void givenSessionUserId(String userId) {
+        Map<String, Object> sessionData = Map.of("signin_info",
+                Map.of("user_profile", Map.of("id", userId)));
+        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+    }
+
     private static JWTClaimsSet claims() {
-        return new JWTClaimsSet.Builder().claim("chs-user-id", USER_ID).claim("form-type", FORM_TYPE).build();
+        return new JWTClaimsSet.Builder().claim("form-type", FORM_TYPE).build();
     }
 }
