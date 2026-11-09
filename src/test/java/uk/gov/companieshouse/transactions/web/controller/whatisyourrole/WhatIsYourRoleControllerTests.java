@@ -12,9 +12,7 @@ import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstant
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -119,22 +117,7 @@ class WhatIsYourRoleControllerTests {
     @DisplayName("GET with no signed-in user in the session returns the error view")
     void getWithNoUserInSession() throws Exception {
 
-        when(sessionService.getSessionDataFromContext()).thenReturn(new HashMap<>());
-
-        mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(view().name("error"));
-
-        verifyNoInteractions(presenterTypesService);
-    }
-
-    @Test
-    @DisplayName("GET with malformed session data returns the error view")
-    void getWithMalformedSession() throws Exception {
-
-        Map<String, Object> sessionData = new HashMap<>();
-        sessionData.put("signin_info", "not-a-map");
-        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+        when(sessionService.getUserId()).thenReturn(null);
 
         mockMvc.perform(get(WHAT_IS_YOUR_ROLE_PATH, TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk())
@@ -157,9 +140,7 @@ class WhatIsYourRoleControllerTests {
     }
 
     private void givenSessionUserId(String userId) {
-        Map<String, Object> sessionData = Map.of("signin_info",
-                Map.of("user_profile", Map.of("id", userId)));
-        when(sessionService.getSessionDataFromContext()).thenReturn(sessionData);
+        when(sessionService.getUserId()).thenReturn(userId);
     }
 
     private static JWTClaimsSet claims() {

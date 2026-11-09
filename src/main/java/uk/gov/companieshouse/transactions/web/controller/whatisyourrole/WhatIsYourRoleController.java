@@ -7,7 +7,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,7 +64,7 @@ public class WhatIsYourRoleController {
             return ERROR_PAGE;
         }
 
-        String chsUserId = getUserIdFromSession();
+        String chsUserId = sessionService.getUserId();
         String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
 
         if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
@@ -107,24 +106,6 @@ public class WhatIsYourRoleController {
         }
 
         return claims;
-    }
-
-    private String getUserIdFromSession() {
-        Map<String, Object> sessionData = sessionService.getSessionDataFromContext();
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> signInInfo = (Map<String, Object>) sessionData.get("signin_info");
-            if (signInInfo != null) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> userProfile = (Map<String, Object>) signInInfo.get("user_profile");
-                if (userProfile != null) {
-                    return (String) userProfile.get("id");
-                }
-            }
-        } catch (ClassCastException e) {
-            LOG.error("Unable to extract user ID from session", e);
-        }
-        return null;
     }
 
     private JWTClaimsSet readClaims(String token) {
