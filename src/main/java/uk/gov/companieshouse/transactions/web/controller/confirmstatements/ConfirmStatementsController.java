@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
+import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
+
 import java.text.ParseException;
 import java.util.List;
 
@@ -24,10 +27,9 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
-import uk.gov.companieshouse.transactions.presenters.PresenterUrlConstants;
 
 @Controller
-@RequestMapping(PresenterUrlConstants.CONFIRM_STATEMENTS_PATH)
+@RequestMapping(CONFIRM_STATEMENTS_PATH)
 public class ConfirmStatementsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
@@ -79,7 +81,7 @@ public class ConfirmStatementsController {
             return ERROR_PAGE;
         }
 
-        model.addAttribute("nextPagePath", PresenterUrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH);
+        model.addAttribute("nextPagePath", CONFIRM_STATEMENTS_NEXT_PAGE_PATH);
         model.addAttribute("statements", confirmStatements);
         model.addAttribute(TOKEN_PARAM, jwToken);
         return getTemplateName();

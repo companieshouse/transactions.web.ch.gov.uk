@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
 import java.util.List;
 
@@ -20,8 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
-
-import uk.gov.companieshouse.transactions.presenters.PresenterUrlConstants;
 
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
@@ -58,7 +57,7 @@ public class ConfirmationStatementControllerTests {
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
 
         mockMvc.perform(get(
-                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                CONFIRM_STATEMENTS_PATH,
                 TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk()).andExpect(view().name("confirmStatement"))
                 .andExpect(model().attribute("token", TOKEN))
@@ -72,7 +71,7 @@ public class ConfirmationStatementControllerTests {
     void getConfirmStatementError() throws Exception {
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenThrow(new ServiceException("some error"));
         mockMvc.perform(get(
-                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
+                CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
     }
@@ -81,7 +80,7 @@ public class ConfirmationStatementControllerTests {
     @DisplayName("GET throws a bad request if no token provided")
     void getBadRequest() throws Exception {
         mockMvc.perform(get(
-                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                CONFIRM_STATEMENTS_PATH,
                 TRANSACTION_ID)).andExpect(status().isBadRequest());
     }
 
@@ -89,7 +88,7 @@ public class ConfirmationStatementControllerTests {
     @DisplayName("GET returns the error page if the JWT is invalid")
     void getJWTInvalidError() throws Exception {
         mockMvc.perform(get(
-                PresenterUrlConstants.CONFIRM_STATEMENTS_PATH,
+                CONFIRM_STATEMENTS_PATH,
                 TRANSACTION_ID).param("token", "not-a-valid-jwtoken"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
