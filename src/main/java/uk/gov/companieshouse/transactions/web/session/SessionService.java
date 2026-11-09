@@ -15,4 +15,11 @@ public interface SessionService {
      * @return a map of session data
      */
     Map<String, Object> getSessionDataFromContext();
+
+    /**
+     * Returns the id of the signed-in user held in the current session.
+     *
+     * @return the user id, or {@code null} if it is absent or the session data is malformed
+     */
+    String getUserId();
 }

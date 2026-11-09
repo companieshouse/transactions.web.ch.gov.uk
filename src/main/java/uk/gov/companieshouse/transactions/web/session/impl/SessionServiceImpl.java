@@ -16,4 +16,21 @@ public class SessionServiceImpl implements SessionService {
 
         return SessionHandler.getSessionDataFromContext();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getUserId() {
+
+        Map<String, Object> sessionData = getSessionDataFromContext();
+
+        if (sessionData != null
+                && sessionData.get("signin_info") instanceof Map<?, ?> signInInfo
+                && signInInfo.get("user_profile") instanceof Map<?, ?> userProfile
+                && userProfile.get("id") instanceof String userId) {
+            return userId;
+        }
+        return null;
+    }
 }
