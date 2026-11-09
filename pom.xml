@@ -14,7 +14,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.14</version>
+        <version>3.0.0</version>
         <relativePath/>
     </parent>
 
@@ -71,10 +71,6 @@
         <!-- Repositories -->
         <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
         <artifactoryResolveReleaseRepo>libs-release-local</artifactoryResolveReleaseRepo>
-
-        <!-- Sonar config -->
-        <sonar.projectKey>uk.gov.companieshouse:transactions.web.ch.gov.uk</sonar.projectKey>
-        <sonar.projectName>transactions.web.ch.gov.uk</sonar.projectName>
 
     </properties>
 
