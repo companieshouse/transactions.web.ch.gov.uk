@@ -37,6 +37,8 @@ public class WhatIsYourRoleController {
 
     private static final String TEMPLATE_NAME = "whatIsYourRole";
 
+    private static final String WHAT_IS_YOUR_ROLE_ATTRIBUTE = "whatIsYourRole";
+
     private static final String TOKEN_PARAM = "token";
 
     private static final String CLAIM_FORM_TYPE = "form-type";
@@ -79,7 +81,7 @@ public class WhatIsYourRoleController {
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
 
-            model.addAttribute("whatIsYourRole", toWhatIsYourRole(presenterTypes));
+            model.addAttribute(WHAT_IS_YOUR_ROLE_ATTRIBUTE, toWhatIsYourRole(presenterTypes));
             model.addAttribute("transactionId", transactionId);
             model.addAttribute("nextPagePath", NEXT_PAGE_PATH);
 
