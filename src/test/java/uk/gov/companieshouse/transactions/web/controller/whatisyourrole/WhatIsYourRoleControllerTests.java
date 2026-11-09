@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.NEXT_PAGE_PATH;
-import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.WHAT_IS_YOUR_ROLE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;

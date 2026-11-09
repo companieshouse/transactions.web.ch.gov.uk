@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
-import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.NEXT_PAGE_PATH;
-import static uk.gov.companieshouse.transactions.web.controller.presenter.PresenterUrlConstants.WHAT_IS_YOUR_ROLE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
