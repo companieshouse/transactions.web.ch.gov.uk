@@ -72,10 +72,6 @@
         <artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
         <artifactoryResolveReleaseRepo>libs-release-local</artifactoryResolveReleaseRepo>
 
-        <!-- Sonar config -->
-        <sonar.projectKey>uk.gov.companieshouse:transactions.web.ch.gov.uk</sonar.projectKey>
-        <sonar.projectName>transactions.web.ch.gov.uk</sonar.projectName>
-
     </properties>
 
     <dependencyManagement>
