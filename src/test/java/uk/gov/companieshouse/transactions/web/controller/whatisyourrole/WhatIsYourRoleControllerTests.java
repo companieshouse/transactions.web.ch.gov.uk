@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -70,7 +70,7 @@ class WhatIsYourRoleControllerTests {
                 .andExpect(model().attribute("token", TOKEN))
                 .andExpect(model().attribute("formType", FORM_TYPE))
                 .andExpect(model().attribute("transactionId", TRANSACTION_ID))
-                .andExpect(model().attribute("nextPagePath", NEXT_PAGE_PATH))
+                .andExpect(model().attribute("nextPagePath", WHAT_IS_YOUR_ROLE_NEXT_PAGE_PATH))
                 .andExpect(model().attribute("templateName", "whatIsYourRole"))
                 .andReturn();
 
