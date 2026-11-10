@@ -3,7 +3,7 @@ package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
-import java.text.ParseException;
+
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
+import uk.gov.companieshouse.transactions.web.utils.jwthelpers.JwtHelpers;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
@@ -60,7 +60,7 @@ public class ConfirmStatementsController {
             HttpServletRequest request,
             Model model) {
 
-        JWTClaimsSet claims = readClaims(jwToken);
+        JWTClaimsSet claims = JwtHelpers.readClaims(jwToken);
 
         if (claims == null) {
             LOGGER.errorContext(xRequestId, "Confirm Statements request JWT blank or malformed", null, null);
@@ -68,7 +68,7 @@ public class ConfirmStatementsController {
         }
 
         String chsUserId = sessionService.getUserId();
-        String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
+        String formType = JwtHelpers.getStringClaim(claims, CLAIM_FORM_TYPE);
 
         if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
             LOGGER.errorContext(xRequestId,
@@ -94,23 +94,6 @@ public class ConfirmStatementsController {
         model.addAttribute("statements", confirmStatements);
         model.addAttribute(TOKEN_PARAM, jwToken);
         return getTemplateName();
-    }
-
-    private JWTClaimsSet readClaims(String token) {
-        if (token == null || token.isBlank()) {
-            return null;
-        }
-
-        try {
-            return JWTParser.parse(token).getJWTClaimsSet();
-        } catch (ParseException ex) {
-            return null;
-        }
-    }
-
-    private String getStringClaim(JWTClaimsSet claims, String name) {
-        Object value = claims.getClaim(name);
-        return value instanceof String string ? string : null;
     }
 
     @ModelAttribute("templateName")

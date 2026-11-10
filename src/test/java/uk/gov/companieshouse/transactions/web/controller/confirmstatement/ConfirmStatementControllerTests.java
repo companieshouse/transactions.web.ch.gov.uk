@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.transactions.web.controller.confirmationstatement;
+package uk.gov.companieshouse.transactions.web.controller.confirmstatement;
 
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -30,7 +30,7 @@ import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmS
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
-class ConfirmationStatementControllerTests {
+class ConfirmStatementControllerTests {
 
     private static final String USER_ID = "0010";
 
