@@ -18,7 +18,7 @@ import uk.gov.companieshouse.transactions.web.transformer.confirmation.Confirmat
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConfirmationTransformerImplTests {
+class ConfirmationTransformerImplTests {
 
     private static final String COMPANY_NAME = "companyName";
 
@@ -53,8 +53,7 @@ public class ConfirmationTransformerImplTests {
     @DisplayName("Get Transaction Confirmation - Valid Transaction")
     void getTransactionConfirmationSuccess() throws UnsupportedTransactionConfirmationException {
 
-        Confirmation confirmation =
-                confirmationTransformer.getTransactionConfirmation(constructValidTransaction());
+        Confirmation confirmation = confirmationTransformer.getTransactionConfirmation(constructValidTransaction());
 
         assertEquals(COMPANY_NAME, confirmation.getCompanyName());
         assertEquals(COMPANY_NUMBER, confirmation.getCompanyNumber());
@@ -69,12 +68,14 @@ public class ConfirmationTransformerImplTests {
     @DisplayName("Get Transaction Confirmation - Invalid Transaction")
     void getTransactionConfirmationThrowsException() {
 
-        assertThrows(UnsupportedTransactionConfirmationException.class, () ->
-                confirmationTransformer.getTransactionConfirmation(constructInvalidTransaction()));
+        assertThrows(UnsupportedTransactionConfirmationException.class,
+                () -> confirmationTransformer.getTransactionConfirmation(constructInvalidTransaction()));
     }
 
     /**
-     * Construct a valid transaction record which can be mapped to a {@link Confirmation} model
+     * Construct a valid transaction record which can be mapped to a
+     * {@link Confirmation} model
+     * 
      * @return a valid transaction
      */
     private Transaction constructValidTransaction() {
@@ -96,7 +97,9 @@ public class ConfirmationTransformerImplTests {
     }
 
     /**
-     * Construct a transaction record which cannot be mapped to a {@link Confirmation} model
+     * Construct a transaction record which cannot be mapped to a
+     * {@link Confirmation} model
+     * 
      * @return an invalid transaction
      */
     private Transaction constructInvalidTransaction() {

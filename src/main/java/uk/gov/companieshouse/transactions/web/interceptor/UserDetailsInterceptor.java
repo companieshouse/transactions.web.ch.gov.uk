@@ -5,8 +5,6 @@ import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,8 +26,8 @@ public class UserDetailsInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-                           @NonNull Object handler, @Nullable ModelAndView modelAndView) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response,
+            Object handler, ModelAndView modelAndView) {
 
         if (modelAndView != null && shouldAttributeBeAdded(request, modelAndView)) {
 
@@ -44,16 +42,19 @@ public class UserDetailsInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * Determines whether to add a model attribute; returns true for all {@code GET} requests, and for
-     * {@code POST} requests which don't force a redirect (to cater for form submissions with errors)
+     * Determines whether to add a model attribute; returns true for all {@code GET}
+     * requests, and for
+     * {@code POST} requests which don't force a redirect (to cater for form
+     * submissions with errors)
      *
-     * @param request The HttpServletRequest
+     * @param request      The HttpServletRequest
      * @param modelAndView The returned ModelAndView
      * @return true or false
      */
     private boolean shouldAttributeBeAdded(HttpServletRequest request, ModelAndView modelAndView) {
         return (request.getMethod().equalsIgnoreCase("GET") ||
-               (request.getMethod().equalsIgnoreCase("POST") &&
-                !Objects.requireNonNull(modelAndView.getViewName()).startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)));
+                (request.getMethod().equalsIgnoreCase("POST") &&
+                        !Objects.requireNonNull(modelAndView.getViewName())
+                                .startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)));
     }
 }

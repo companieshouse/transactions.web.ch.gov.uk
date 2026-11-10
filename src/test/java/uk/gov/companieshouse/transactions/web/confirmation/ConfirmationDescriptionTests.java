@@ -12,7 +12,7 @@ import uk.gov.companieshouse.transactions.web.exception.UnsupportedTransactionCo
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConfirmationDescriptionTests {
+class ConfirmationDescriptionTests {
 
     @Test
     @DisplayName("Get Confirmation Description - Valid Transaction Description")
@@ -22,8 +22,8 @@ public class ConfirmationDescriptionTests {
 
         String expectedConfirmationDescription = "Full accounts";
 
-        String confirmationDescription =
-                ConfirmationDescription.getConfirmationDescription(validTransactionDescription);
+        String confirmationDescription = ConfirmationDescription
+                .getConfirmationDescription(validTransactionDescription);
 
         assertEquals(expectedConfirmationDescription, confirmationDescription);
     }
@@ -34,8 +34,8 @@ public class ConfirmationDescriptionTests {
 
         String invalidTransactionDescription = "invalidTransactionDescription";
 
-        assertThrows(UnsupportedTransactionConfirmationException.class, () ->
-                ConfirmationDescription.getConfirmationDescription(invalidTransactionDescription));
+        assertThrows(UnsupportedTransactionConfirmationException.class,
+                () -> ConfirmationDescription.getConfirmationDescription(invalidTransactionDescription));
     }
 
 }

@@ -2,8 +2,6 @@ package uk.gov.companieshouse.transactions.web.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,18 +13,18 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 @Component
 public class LoggingInterceptor implements AsyncHandlerInterceptor, RequestLogger {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         logStartRequestProcessing(request, LOGGER);
         return true;
     }
 
     @Override
-    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, @Nullable ModelAndView modelAndView) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) {
 
         logEndRequestProcessing(request, response, LOGGER);
         LOGGER.info("End of Request Processing");

@@ -26,7 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import uk.gov.companieshouse.logging.util.LogContextProperties;
 
 @ExtendWith(MockitoExtension.class)
-public class LoggingInterceptorTests {
+class LoggingInterceptorTests {
 
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -42,7 +42,7 @@ public class LoggingInterceptorTests {
     private ByteArrayOutputStream out;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(httpServletRequest.getSession()).thenReturn(session);
         out = new ByteArrayOutputStream();
         System.setOut(new PrintStream(out));
@@ -50,17 +50,17 @@ public class LoggingInterceptorTests {
 
     @Test
     @DisplayName("Tests the interceptor logs the start of the request")
-    public void preHandle() {
+    void preHandle() {
         loggingInterceptor.preHandle(httpServletRequest, httpServletResponse, new Object());
         verify(session, times(1)).setAttribute(eq(LogContextProperties.START_TIME_KEY.value()), anyLong());
         String data = this.getOutputJson().toString();
         assertThat(data, containsString(LogContextProperties.START_OF_REQUEST_MSG.value()));
-        assertThat(data, containsString( "\"event\":\"info\""));
+        assertThat(data, containsString("\"event\":\"info\""));
     }
 
     @Test
     @DisplayName("Tests the interceptor logs the end of the request")
-    public void postHandle() {
+    void postHandle() {
         when(session.getAttribute(LogContextProperties.START_TIME_KEY.value()))
                 .thenReturn(System.currentTimeMillis());
         when(httpServletResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
@@ -69,9 +69,9 @@ public class LoggingInterceptorTests {
         verify(session, times(1)).getAttribute(LogContextProperties.START_TIME_KEY.value());
         String data = this.getOutputJson().toString();
         assertThat(data, containsString(LogContextProperties.END_OF_REQUEST_MSG.value()));
-        assertThat(data, containsString( "\"event\":\"info\""));
-        assertThat(data, containsString( "duration"));
-        assertThat(data, containsString( "status\":200"));
+        assertThat(data, containsString("\"event\":\"info\""));
+        assertThat(data, containsString("duration"));
+        assertThat(data, containsString("status\":200"));
     }
 
     private JSONObject getOutputJson() {

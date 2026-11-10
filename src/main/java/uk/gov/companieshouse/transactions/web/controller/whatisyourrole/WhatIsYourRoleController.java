@@ -4,8 +4,6 @@ import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstant
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
-import java.text.ParseException;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,13 +23,13 @@ import uk.gov.companieshouse.transactions.web.model.whatisyourrole.Role;
 import uk.gov.companieshouse.transactions.web.model.whatisyourrole.WhatIsYourRole;
 import uk.gov.companieshouse.transactions.web.service.presentertype.PresenterTypesService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
+import uk.gov.companieshouse.transactions.web.utils.jwthelpers.JwtHelpers;
 
 @Controller
 @RequestMapping(WHAT_IS_YOUR_ROLE_PATH)
 public class WhatIsYourRoleController {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionsWebApplication.APPLICATION_NAME_SPACE);
 
     private static final String ERROR_PAGE = "error";
 
@@ -48,35 +46,40 @@ public class WhatIsYourRoleController {
     private final SessionService sessionService;
 
     public WhatIsYourRoleController(PresenterTypesService presenterTypesService,
-                                    SessionService sessionService) {
+            SessionService sessionService) {
         this.presenterTypesService = presenterTypesService;
         this.sessionService = sessionService;
     }
 
     @GetMapping
     public String getWhatIsYourRole(@PathVariable("transactionId") String transactionId,
-                                    @RequestParam(value = TOKEN_PARAM, required = true) String token,
-                                    @RequestHeader(value = "X-Request-Id", required = false) String xRequestId,
-                                    Model model) {
+            @RequestParam(value = TOKEN_PARAM, required = true) String token,
+            @RequestHeader(value = "X-Request-Id", required = false) String xRequestId,
+            Model model) {
 
         JWTClaimsSet claims = addTokenToModel(token, model);
 
         if (claims == null) {
-            LOG.errorContext(xRequestId, "What is your role request received with a missing or malformed token", null, null);
+            LOG.errorContext(xRequestId, "What is your role request received with a missing or malformed token", null,
+                    null);
             return ERROR_PAGE;
         }
 
         String chsUserId = sessionService.getUserId();
-        String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
+        String formType = JwtHelpers.getStringClaim(claims, CLAIM_FORM_TYPE);
 
         if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
-            LOG.errorContext(xRequestId, "What is your role request received without a user id in the session or a transaction id", null, null);
+            LOG.errorContext(xRequestId,
+                    "What is your role request received without a user id in the session or a transaction id", null,
+                    null);
             return ERROR_PAGE;
         }
 
         DataMap whatIsYourRoleDataMap = new DataMap.Builder().chsUserId(chsUserId).transactionId(transactionId).build();
 
-        LOG.infoContext(xRequestId, "What is your role request received for transaction " + transactionId + " and form type " + formType, whatIsYourRoleDataMap.getLogMap());
+        LOG.infoContext(xRequestId,
+                "What is your role request received for transaction " + transactionId + " and form type " + formType,
+                whatIsYourRoleDataMap.getLogMap());
 
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
@@ -95,36 +98,21 @@ public class WhatIsYourRoleController {
     }
 
     /**
-     * Reads the token and, if it can be read, adds it and its claims to the model so the page can
-     * display them and pass the token on. Returns the claims, or {@code null} if the token
+     * Reads the token and, if it can be read, adds it and its claims to the model
+     * so the page can
+     * display them and pass the token on. Returns the claims, or {@code null} if
+     * the token
      * could not be read. The token is not verified here.
      */
     private JWTClaimsSet addTokenToModel(String token, Model model) {
-        JWTClaimsSet claims = readClaims(token);
+        JWTClaimsSet claims = JwtHelpers.readClaims(token);
 
         if (claims != null) {
             model.addAttribute(TOKEN_PARAM, token);
-            model.addAttribute("formType", getStringClaim(claims, CLAIM_FORM_TYPE));
+            model.addAttribute("formType", JwtHelpers.getStringClaim(claims, CLAIM_FORM_TYPE));
         }
 
         return claims;
-    }
-
-    private JWTClaimsSet readClaims(String token) {
-        if (token == null || token.isBlank()) {
-            return null;
-        }
-
-        try {
-            return JWTParser.parse(token).getJWTClaimsSet();
-        } catch (ParseException ex) {
-            return null;
-        }
-    }
-
-    private String getStringClaim(JWTClaimsSet claims, String name) {
-        Object value = claims.getClaim(name);
-        return value instanceof String string ? string : null;
     }
 
     private WhatIsYourRole toWhatIsYourRole(List<PresenterType> presenterTypes) {
