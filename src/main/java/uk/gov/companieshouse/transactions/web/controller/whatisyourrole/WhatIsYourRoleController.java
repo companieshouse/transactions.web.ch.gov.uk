@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.whatisyourrole;
 
-import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.WHAT_IS_YOUR_ROLE_PATH;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -86,7 +86,8 @@ public class WhatIsYourRoleController {
 
             model.addAttribute(WHAT_IS_YOUR_ROLE_ATTRIBUTE, toWhatIsYourRole(presenterTypes));
             model.addAttribute("transactionId", transactionId);
-            model.addAttribute("nextPagePath", WHAT_IS_YOUR_ROLE_NEXT_PAGE_PATH);
+            model.addAttribute("nextPagePath",
+                    CONFIRM_STATEMENTS_PATH.replace("{transactionId}", transactionId));
 
             return getTemplateName();
 
