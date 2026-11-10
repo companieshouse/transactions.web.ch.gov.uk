@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
-import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
-import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
 import java.text.ParseException;
 import java.util.List;
@@ -27,6 +27,7 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @Controller
 @RequestMapping(CONFIRM_STATEMENTS_PATH)
@@ -38,15 +39,17 @@ public class ConfirmStatementsController {
 
     private static final String TOKEN_PARAM = "token";
 
-    private static final String CLAIM_CHS_USER_ID = "chs-user-id";
-
     private static final String CLAIM_FORM_TYPE = "form-type";
 
     private final ConfirmStatementsService confirmStatementsService;
 
+    private final SessionService sessionService;
+
     public ConfirmStatementsController(
+            SessionService sessionService,
             ConfirmStatementsService confirmStatementsService) {
         this.confirmStatementsService = confirmStatementsService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping
@@ -64,8 +67,14 @@ public class ConfirmStatementsController {
             return ERROR_PAGE;
         }
 
-        String chsUserId = getStringClaim(claims, CLAIM_CHS_USER_ID);
+        String chsUserId = sessionService.getUserId();
         String formType = getStringClaim(claims, CLAIM_FORM_TYPE);
+
+        if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
+            LOGGER.errorContext(xRequestId,
+                    "Confirm statements received without a user id in the session or a transaction id", null, null);
+            return ERROR_PAGE;
+        }
 
         DataMap confirmStatementsDataMap = new DataMap.Builder().chsUserId(chsUserId).transactionId(transactionId)
                 .build();

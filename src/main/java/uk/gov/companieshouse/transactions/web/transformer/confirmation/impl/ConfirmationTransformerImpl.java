@@ -24,15 +24,16 @@ public class ConfirmationTransformerImpl implements ConfirmationTransformer {
      * {@inheritDoc}
      */
     @Override
-    public Confirmation getTransactionConfirmation(Transaction transaction) throws UnsupportedTransactionConfirmationException {
+    public Confirmation getTransactionConfirmation(Transaction transaction)
+            throws UnsupportedTransactionConfirmationException {
 
         Confirmation confirmation = new Confirmation();
 
         confirmation.setCompanyName(transaction.getCompanyName());
         confirmation.setCompanyNumber(transaction.getCompanyNumber());
 
-        String confirmationDescription =
-                ConfirmationDescription.getConfirmationDescription(transaction.getDescription());
+        String confirmationDescription = ConfirmationDescription
+                .getConfirmationDescription(transaction.getDescription());
         confirmation.setConfirmationDescription(confirmationDescription);
 
         Instant closedInstant = Instant.parse(transaction.getClosedAt());

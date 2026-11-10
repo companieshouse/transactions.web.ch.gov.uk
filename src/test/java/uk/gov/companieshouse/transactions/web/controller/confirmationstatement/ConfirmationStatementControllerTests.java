@@ -1,11 +1,12 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmationstatement;
 
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static uk.gov.companieshouse.transactions.web.util.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import uk.gov.companieshouse.transactions.web.controller.confirmstatements.Confi
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfirmationStatementControllerTests {
@@ -42,6 +44,9 @@ public class ConfirmationStatementControllerTests {
     @Mock
     private ConfirmStatementsService confirmStatementsService;
 
+    @Mock
+    private SessionService sessionService;
+
     @InjectMocks
     private ConfirmStatementsController controller;
 
@@ -55,6 +60,7 @@ public class ConfirmationStatementControllerTests {
     void getConfirmStatement() throws Exception {
         List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
+        givenSessionUserId(USER_ID);
 
         mockMvc.perform(get(
                 CONFIRM_STATEMENTS_PATH,
@@ -69,6 +75,7 @@ public class ConfirmationStatementControllerTests {
     @Test
     @DisplayName("GET returns an error page if statements to confirm can't be retrieved")
     void getConfirmStatementError() throws Exception {
+        givenSessionUserId(USER_ID);
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenThrow(new ServiceException("some error"));
         mockMvc.perform(get(
                 CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
@@ -85,6 +92,28 @@ public class ConfirmationStatementControllerTests {
     }
 
     @Test
+    @DisplayName("GET without a signed-in session returns the error page")
+    void getWithoutSession() throws Exception {
+        when(sessionService.getUserId()).thenReturn(null);
+        mockMvc.perform(get(
+                CONFIRM_STATEMENTS_PATH,
+                TRANSACTION_ID).param("token", TOKEN)).andExpect(status().isOk()).andExpect(view().name("error"));
+    }
+
+    @Test
+    @DisplayName("GET with a blank transaction id returns the error view")
+    void getWithBlankTransactionId() throws Exception {
+
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, " ").param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(confirmStatementsService);
+    }
+
+    @Test
     @DisplayName("GET returns the error page if the JWT is invalid")
     void getJWTInvalidError() throws Exception {
         mockMvc.perform(get(
@@ -92,6 +121,10 @@ public class ConfirmationStatementControllerTests {
                 TRANSACTION_ID).param("token", "not-a-valid-jwtoken"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
+    }
+
+    private void givenSessionUserId(String userId) {
+        when(sessionService.getUserId()).thenReturn(userId);
     }
 
     private static JWTClaimsSet claims() {

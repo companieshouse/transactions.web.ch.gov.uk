@@ -18,38 +18,38 @@ import uk.gov.companieshouse.transactions.web.model.confirmation.Confirmation;
 import uk.gov.companieshouse.transactions.web.transformer.confirmation.ConfirmationTransformer;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfirmationServiceImplTests {
+class ConfirmationServiceImplTests {
 
-    @Mock
-    private ConfirmationTransformer confirmationTransformer;
+        @Mock
+        private ConfirmationTransformer confirmationTransformer;
 
-    @InjectMocks
-    private ConfirmationServiceImpl confirmationService;
+        @InjectMocks
+        private ConfirmationServiceImpl confirmationService;
 
-    @Test
-    @DisplayName("Get Transaction Confirmation - Success Path")
-    void getTransactionConfirmationSuccess() throws UnsupportedTransactionConfirmationException, ServiceException {
+        @Test
+        @DisplayName("Get Transaction Confirmation - Success Path")
+        void getTransactionConfirmationSuccess() throws UnsupportedTransactionConfirmationException, ServiceException {
 
-        Transaction transaction = new Transaction();
+                Transaction transaction = new Transaction();
 
-        when(confirmationTransformer.getTransactionConfirmation(transaction))
-                .thenReturn(new Confirmation());
+                when(confirmationTransformer.getTransactionConfirmation(transaction))
+                                .thenReturn(new Confirmation());
 
-        assertNotNull(confirmationService.getTransactionConfirmation(transaction));
-    }
+                assertNotNull(confirmationService.getTransactionConfirmation(transaction));
+        }
 
-    @Test
-    @DisplayName("Get Transaction Confirmation - Transformer Throws Exception")
-    void getTransactionConfirmationThrowsException()
-            throws UnsupportedTransactionConfirmationException {
+        @Test
+        @DisplayName("Get Transaction Confirmation - Transformer Throws Exception")
+        void getTransactionConfirmationThrowsException()
+                        throws UnsupportedTransactionConfirmationException {
 
-        Transaction transaction = new Transaction();
+                Transaction transaction = new Transaction();
 
-        doThrow(UnsupportedTransactionConfirmationException.class)
-                .when(confirmationTransformer).getTransactionConfirmation(transaction);
+                doThrow(UnsupportedTransactionConfirmationException.class)
+                                .when(confirmationTransformer).getTransactionConfirmation(transaction);
 
-        assertThrows(ServiceException.class,
-                () -> confirmationService.getTransactionConfirmation(transaction));
-    }
+                assertThrows(ServiceException.class,
+                                () -> confirmationService.getTransactionConfirmation(transaction));
+        }
 
 }

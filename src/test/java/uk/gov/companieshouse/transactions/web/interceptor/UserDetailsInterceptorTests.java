@@ -24,7 +24,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
-public class UserDetailsInterceptorTests {
+class UserDetailsInterceptorTests {
 
     private static final String USER_EMAIL = "userEmail";
 
