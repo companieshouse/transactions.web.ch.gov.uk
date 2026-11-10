@@ -30,13 +30,14 @@ import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmS
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfirmationStatementControllerTests {
+class ConfirmationStatementControllerTests {
 
     private static final String USER_ID = "0010";
 
     private static final String FORM_TYPE = "AA01";
 
     private static final String TRANSACTION_ID = "123456-654321-123456";
+
     private static final String TOKEN = new PlainJWT(claims()).serialize();
 
     private MockMvc mockMvc;
