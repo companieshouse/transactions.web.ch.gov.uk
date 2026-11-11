@@ -21,12 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.PlainJWT;
 
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.token.TokenService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ class ConfirmStatementControllerTests {
 
     private static final String TRANSACTION_ID = "123456-654321-123456";
 
-    private static final String TOKEN = new PlainJWT(claims()).serialize();
+    private static final String TOKEN = "transactions-web.token";
 
     private MockMvc mockMvc;
 
@@ -47,6 +47,9 @@ class ConfirmStatementControllerTests {
 
     @Mock
     private SessionService sessionService;
+
+    @Mock
+    private TokenService tokenService;
 
     @InjectMocks
     private ConfirmStatementsController controller;
@@ -61,6 +64,7 @@ class ConfirmStatementControllerTests {
     void getConfirmStatement() throws Exception {
         List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
+        givenValidToken();
         givenSessionUserId(USER_ID);
 
         mockMvc.perform(get(
@@ -76,6 +80,7 @@ class ConfirmStatementControllerTests {
     @Test
     @DisplayName("GET returns an error page if statements to confirm can't be retrieved")
     void getConfirmStatementError() throws Exception {
+        givenValidToken();
         givenSessionUserId(USER_ID);
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenThrow(new ServiceException("some error"));
         mockMvc.perform(get(
@@ -95,40 +100,37 @@ class ConfirmStatementControllerTests {
     @Test
     @DisplayName("GET without a signed-in session returns the error page")
     void getWithoutSession() throws Exception {
+        givenValidToken();
         when(sessionService.getUserId()).thenReturn(null);
         mockMvc.perform(get(
                 CONFIRM_STATEMENTS_PATH,
                 TRANSACTION_ID).param("token", TOKEN)).andExpect(status().isOk()).andExpect(view().name("error"));
+
+        verifyNoInteractions(confirmStatementsService);
     }
 
     @Test
-    @DisplayName("GET with a blank transaction id returns the error view")
-    void getWithBlankTransactionId() throws Exception {
-
-        givenSessionUserId(USER_ID);
-
-        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, " ").param("token", TOKEN))
+    @DisplayName("GET returns the error page if the token fails verification")
+    void getTokenInvalidError() throws Exception {
+        mockMvc.perform(get(
+                CONFIRM_STATEMENTS_PATH,
+                TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error"));
 
         verifyNoInteractions(confirmStatementsService);
     }
 
-    @Test
-    @DisplayName("GET returns the error page if the JWT is invalid")
-    void getJWTInvalidError() throws Exception {
-        mockMvc.perform(get(
-                CONFIRM_STATEMENTS_PATH,
-                TRANSACTION_ID).param("token", "not-a-valid-jwtoken"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("error"));
+    private void givenValidToken() {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .claim("form_type", FORM_TYPE)
+                .claim("transaction_id", TRANSACTION_ID)
+                .claim("role", "id")
+                .build();
+        when(tokenService.verifyTransactionsWebToken(TOKEN, TRANSACTION_ID)).thenReturn(claims);
     }
 
     private void givenSessionUserId(String userId) {
         when(sessionService.getUserId()).thenReturn(userId);
-    }
-
-    private static JWTClaimsSet claims() {
-        return new JWTClaimsSet.Builder().claim("chs-user-id", USER_ID).claim("form-type", FORM_TYPE).build();
     }
 }
