@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.transactions.web.model.statement;
 
 public class Statement {
-    private String id;
-    private String statementText;
+    private final String id;
+    private final String statementText;
 
     public Statement(String id, String statementText) {
         this.id = id;
@@ -13,15 +13,7 @@ public class Statement {
         return id;
     }
 
-    public String getstatement() {
+    public String getStatementText() {
         return statementText;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setstatement(String statement) {
-        this.statementText = statement;
     }
 }
