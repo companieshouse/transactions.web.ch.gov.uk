@@ -25,8 +25,9 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 
 /**
  * Verifies the token received from the CHS journey, and issues and verifies the
- * token this service passes between its own pages. The two use different
- * secrets so a token from one cannot be accepted as the other.
+ * token this service passes between its own pages. Both are signed with the
+ * same secret; the issued token is told apart by its required {@code role}
+ * claim.
  */
 @Service
 public class TokenService {
@@ -35,17 +36,13 @@ public class TokenService {
 
     private static final String ISSUER = "transactions-web";
 
-    private final String chsSecret;
-
-    private final String transactionsWebSecret;
+    private final String secret;
 
     private final Duration lifetime;
 
-    public TokenService(@Value("${jwt.signing.key}") String chsSecret,
-            @Value("${transactions.web.jwt.secret}") String transactionsWebSecret,
+    public TokenService(@Value("${jwt.signing.key}") String secret,
             @Value("${transactions.web.jwt.lifetime-minutes:30}") long lifetimeMinutes) {
-        this.chsSecret = chsSecret;
-        this.transactionsWebSecret = transactionsWebSecret;
+        this.secret = secret;
         this.lifetime = Duration.ofMinutes(lifetimeMinutes);
     }
 
@@ -55,7 +52,7 @@ public class TokenService {
      * transaction.
      */
     public JWTClaimsSet verifyChsToken(String token, String transactionId) {
-        return checkClaims(verifySignature(token, chsSecret), transactionId, false);
+        return checkClaims(verifySignature(token), transactionId, false);
     }
 
     /**
@@ -64,7 +61,7 @@ public class TokenService {
      * transaction.
      */
     public JWTClaimsSet verifyTransactionsWebToken(String token, String transactionId) {
-        return checkClaims(verifySignature(token, transactionsWebSecret), transactionId, true);
+        return checkClaims(verifySignature(token), transactionId, true);
     }
 
     /**
@@ -87,7 +84,7 @@ public class TokenService {
             }
         });
 
-        return sign(builder.build(), transactionsWebSecret);
+        return sign(builder.build());
     }
 
     public static String getStringClaim(JWTClaimsSet claims, String name) {
@@ -100,7 +97,7 @@ public class TokenService {
      * malformed, uses a different algorithm, has an invalid signature, or has
      * expired.
      */
-    private JWTClaimsSet verifySignature(String token, String secret) {
+    private JWTClaimsSet verifySignature(String token) {
         if (isBlank(token)) {
             return null;
         }
@@ -143,7 +140,7 @@ public class TokenService {
      * {@code null} if the secret is missing or unusable (e.g. shorter than 256
      * bits).
      */
-    private String sign(JWTClaimsSet claims, String secret) {
+    private String sign(JWTClaimsSet claims) {
         if (isBlank(secret)) {
             LOG.error("JWT not created: no signing secret configured", new HashMap<>());
             return null;

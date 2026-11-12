@@ -17,17 +17,17 @@ import org.junit.jupiter.api.Test;
 
 class TokenServiceTests {
 
-    private static final String CHS_SECRET = "chs-secret-chs-secret-chs-secret-chs-secret-chs-secret-0123456789";
-    private static final String WEB_SECRET = "web-secret-web-secret-web-secret-web-secret-web-secret-0123456789";
+    private static final String SECRET = "chs-secret-chs-secret-chs-secret-chs-secret-chs-secret-0123456789";
+    private static final String OTHER_SECRET = "web-secret-web-secret-web-secret-web-secret-web-secret-0123456789";
     private static final String TRANSACTION_ID = "123456-654321-123456";
 
-    private final TokenService tokenService = new TokenService(CHS_SECRET, WEB_SECRET, 30);
+    private final TokenService tokenService = new TokenService(SECRET, 30);
 
     @Test
     @DisplayName("verifyChsToken returns the claims of a valid token for the transaction")
     void verifyChsTokenValid() {
         JWTClaimsSet claims = tokenService.verifyChsToken(
-                sign(CHS_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future())), TRANSACTION_ID);
+                sign(SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future())), TRANSACTION_ID);
 
         assertNotNull(claims);
         assertEquals("AD01", TokenService.getStringClaim(claims, "form_type"));
@@ -48,7 +48,7 @@ class TokenServiceTests {
     @Test
     @DisplayName("verifyChsToken returns null for a token signed with a different secret")
     void verifyChsTokenWrongSecret() {
-        String token = sign(WEB_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future()));
+        String token = sign(OTHER_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future()));
 
         assertNull(tokenService.verifyChsToken(token, TRANSACTION_ID));
     }
@@ -70,7 +70,7 @@ class TokenServiceTests {
     @Test
     @DisplayName("verifyChsToken returns null for a token signed with a different algorithm")
     void verifyChsTokenWrongAlgorithm() {
-        String token = sign(CHS_SECRET, JWSAlgorithm.HS512, claims("AD01", TRANSACTION_ID, null, future()));
+        String token = sign(SECRET, JWSAlgorithm.HS512, claims("AD01", TRANSACTION_ID, null, future()));
 
         assertNull(tokenService.verifyChsToken(token, TRANSACTION_ID));
     }
@@ -87,7 +87,7 @@ class TokenServiceTests {
     @Test
     @DisplayName("verifyChsToken returns null when no secret is configured")
     void verifyChsTokenNoSecretConfigured() {
-        TokenService noSecret = new TokenService("", WEB_SECRET, 30);
+        TokenService noSecret = new TokenService("", 30);
 
         assertNull(noSecret.verifyChsToken(chsToken("AD01", TRANSACTION_ID, future()), TRANSACTION_ID));
     }
@@ -128,15 +128,15 @@ class TokenServiceTests {
     @Test
     @DisplayName("verifyTransactionsWebToken returns null when the role is missing")
     void verifyTransactionsWebTokenNoRole() {
-        String token = sign(WEB_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future()));
+        String token = sign(SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, null, future()));
 
         assertNull(tokenService.verifyTransactionsWebToken(token, TRANSACTION_ID));
     }
 
     @Test
-    @DisplayName("verifyTransactionsWebToken returns null for a token signed with the CHS secret")
-    void verifyTransactionsWebTokenRejectsChsToken() {
-        String token = sign(CHS_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, "owner", future()));
+    @DisplayName("verifyTransactionsWebToken returns null for a token signed with a different secret")
+    void verifyTransactionsWebTokenWrongSecret() {
+        String token = sign(OTHER_SECRET, JWSAlgorithm.HS256, claims("AD01", TRANSACTION_ID, "owner", future()));
 
         assertNull(tokenService.verifyTransactionsWebToken(token, TRANSACTION_ID));
     }
@@ -146,8 +146,8 @@ class TokenServiceTests {
     void createTokenUnusableSecret() {
         JWTClaimsSet incoming = claims("AD01", TRANSACTION_ID, null, null);
 
-        assertNull(new TokenService(CHS_SECRET, "", 30).createTransactionsWebToken(incoming, "owner"));
-        assertNull(new TokenService(CHS_SECRET, "too-short", 30).createTransactionsWebToken(incoming, "owner"));
+        assertNull(new TokenService("", 30).createTransactionsWebToken(incoming, "owner"));
+        assertNull(new TokenService("too-short", 30).createTransactionsWebToken(incoming, "owner"));
     }
 
     @Test
@@ -160,7 +160,7 @@ class TokenServiceTests {
     }
 
     private static String chsToken(String formType, String transactionId, Date expiry) {
-        return sign(CHS_SECRET, JWSAlgorithm.HS256, claims(formType, transactionId, null, expiry));
+        return sign(SECRET, JWSAlgorithm.HS256, claims(formType, transactionId, null, expiry));
     }
 
     private static Date future() {
