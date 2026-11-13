@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
-import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
-
 
 import java.util.List;
 
@@ -16,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
@@ -41,6 +40,8 @@ public class ConfirmStatementsController {
 
     private static final String CLAIM_FORM_TYPE = "form-type";
 
+    private static final String CLAIM_RETURN_URL = "return-url";
+
     private final ConfirmStatementsService confirmStatementsService;
 
     private final SessionService sessionService;
@@ -57,6 +58,8 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
+            @RequestParam("role") String userRole,
+            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
             HttpServletRequest request,
             Model model) {
 
@@ -81,8 +84,15 @@ public class ConfirmStatementsController {
         LOGGER.infoContext(xRequestId,
                 "Confirm statements request received for " + transactionId + " and form type " + formType,
                 confirmStatementsDataMap.getLogMap());
-        List<Statement> confirmStatements;
 
+        if (!selectedStatements.isEmpty()) {
+            // PUT/PATCH to go in here, I think.
+            String redirectUrl = JwtHelpers.getStringClaim(claims, CLAIM_RETURN_URL);
+            return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
+                    + JwtHelpers.getStringClaim(claims, "lang") + "&token=" + jwToken;
+        }
+
+        List<Statement> confirmStatements;
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
         } catch (ServiceException e) {
@@ -90,15 +100,13 @@ public class ConfirmStatementsController {
             return ERROR_PAGE;
         }
 
-        model.addAttribute("nextPagePath", CONFIRM_STATEMENTS_NEXT_PAGE_PATH);
-        model.addAttribute("statements", confirmStatements);
         model.addAttribute(TOKEN_PARAM, jwToken);
+        model.addAttribute("statements", confirmStatements);
         return getTemplateName();
     }
 
     @ModelAttribute("templateName")
     private static String getTemplateName() {
-
         return "confirmStatement";
     }
 }
