@@ -9,6 +9,15 @@ The Companies House web application for handling transactions
 ### Getting Started
 - enable the accounts module in chs-dev: chs-dev modules enable accounts
 
+### Environment variables
+The following secret has no default value. The application will not start unless it is set.
+
+Variable | Description
+:---------|:-----------
+`CHS_JWT_SECRET` | Secret used to verify the token received from the CHS journey (HS256), and to sign and verify the token this service issues once the user has chosen their role (valid for 30 minutes). Shared with the service that issues the incoming token (e.g. acsp-web), so it must be the same value. At least 32 characters long.
+
+For local development this is already in `global.env`; ensure it reaches the service's container. In deployed environments it is stored in Vault (see below). Never commit its value.
+
 ### Confluence pages
 
 [Design Page](https://companieshouse.atlassian.net/wiki/spaces/DEV/pages/529137946/Transactions+Web+Service+-+Confirmation+Design)
