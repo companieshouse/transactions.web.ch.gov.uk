@@ -13,7 +13,7 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-      <form id="what-is-your-role-form" th:action="@{${nextPagePath}}" method="get">
+      <form id="what-is-your-role-form" th:action="@{${formAction}}" method="post">
         <input type="hidden" name="token" th:value="${token}">
         <div class="govuk-form-group">
           <fieldset class="govuk-fieldset">
