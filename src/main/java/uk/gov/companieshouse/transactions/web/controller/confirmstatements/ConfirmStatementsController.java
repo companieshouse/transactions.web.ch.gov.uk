@@ -24,13 +24,14 @@ import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
-import uk.gov.companieshouse.transactions.web.utils.jwthelpers.JwtHelpers;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.token.TokenService;
 import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
+import uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims;
 import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
 
 
@@ -45,21 +46,25 @@ public class ConfirmStatementsController {
 
     private static final String TOKEN_PARAM = "token";
 
-    private static final String CLAIM_FORM_TYPE = "form-type";
+    private static final String CLAIM_FORM_TYPE = TokenClaims.FORM_TYPE;
 
     private final ConfirmStatementsService confirmStatementsService;
 
     private final SessionService sessionService;
 
+    private final TokenService tokenService;
+
     private final TransactionsService transactionsService;
 
     public ConfirmStatementsController(
             SessionService sessionService,
+            TokenService tokenService,
             ConfirmStatementsService confirmStatementsService,
             TransactionsService transactionsService) {
         this.transactionsService = transactionsService;
         this.confirmStatementsService = confirmStatementsService;
         this.sessionService = sessionService;
+        this.tokenService = tokenService;
     }
 
     @GetMapping
@@ -70,15 +75,15 @@ public class ConfirmStatementsController {
             HttpServletRequest request,
             Model model) {
 
-        JWTClaimsSet claims = JwtHelpers.readClaims(jwToken);
+        JWTClaimsSet claims = tokenService.verifyTransactionsWebToken(jwToken, transactionId);
 
         if (claims == null) {
-            LOGGER.errorContext(xRequestId, "Confirm Statements request JWT blank or malformed", null, null);
+            LOGGER.errorContext(xRequestId, "Confirm Statements request received with an invalid token", null, null);
             return ERROR_PAGE;
         }
 
         String chsUserId = sessionService.getUserId();
-        String formType = JwtHelpers.getStringClaim(claims, CLAIM_FORM_TYPE);
+        String formType = TokenService.getStringClaim(claims, CLAIM_FORM_TYPE);
 
         if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
             LOGGER.errorContext(xRequestId,
