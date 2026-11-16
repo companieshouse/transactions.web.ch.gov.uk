@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims.RETURN_URL;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
 import java.util.List;
@@ -72,9 +73,18 @@ class ConfirmStatementControllerTests {
                 TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk()).andExpect(view().name("confirmStatement"))
                 .andExpect(model().attribute("token", TOKEN))
-                .andExpect(model().attribute("nextPagePath", "next/page"))
                 .andExpect(model().attribute("templateName", "confirmStatement"));
+    }
 
+    @Test
+    @DisplayName("GET returns redirect if a list of statements is sent")
+    void getConfirmStatementAfterFormSubmit() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN).param("selectedStatements",
+                "statement1", "statement2")).andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:return-url?lang=en&token=transactions-web.token"));
     }
 
     @Test
@@ -126,6 +136,8 @@ class ConfirmStatementControllerTests {
                 .claim("form_type", FORM_TYPE)
                 .claim("transaction_id", TRANSACTION_ID)
                 .claim("role", "id")
+                .claim("lang", "en")
+                .claim(RETURN_URL, "return-url")
                 .build();
         when(tokenService.verifyTransactionsWebToken(TOKEN, TRANSACTION_ID)).thenReturn(claims);
     }

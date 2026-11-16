@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
+import static uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims.RETURN_URL;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
 
 import java.util.List;
@@ -41,8 +42,6 @@ public class ConfirmStatementsController {
 
     private static final String CLAIM_FORM_TYPE = TokenClaims.FORM_TYPE;
 
-    private static final String CLAIM_RETURN_URL = "return-url";
-
     private final ConfirmStatementsService confirmStatementsService;
 
     private final SessionService sessionService;
@@ -63,7 +62,7 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
-            @RequestParam("role") String userRole,
+            @RequestParam(value = "role", required = false) String userRole,
             @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
             HttpServletRequest request,
             Model model) {
@@ -90,11 +89,11 @@ public class ConfirmStatementsController {
                 "Confirm statements request received for " + transactionId + " and form type " + formType,
                 confirmStatementsDataMap.getLogMap());
 
-        if (!selectedStatements.isEmpty()) {
+        if (selectedStatements != null && !selectedStatements.isEmpty()) {
             // PUT/PATCH to go in here, I think.
-            String redirectUrl = JwtHelpers.getStringClaim(claims, CLAIM_RETURN_URL);
+            String redirectUrl = TokenService.getStringClaim(claims, RETURN_URL);
             return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
-                    + JwtHelpers.getStringClaim(claims, "lang") + "&token=" + jwToken;
+                    + TokenService.getStringClaim(claims, "lang") + "&token=" + jwToken;
         }
 
         List<Statement> confirmStatements;
