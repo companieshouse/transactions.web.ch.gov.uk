@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
+import uk.gov.companieshouse.api.model.transaction.ProtectedData;
+import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
@@ -27,7 +29,11 @@ import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
+import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
+
+
 
 @Controller
 @RequestMapping(CONFIRM_STATEMENTS_PATH)
@@ -45,9 +51,13 @@ public class ConfirmStatementsController {
 
     private final SessionService sessionService;
 
+    private final TransactionsService transactionsService;
+
     public ConfirmStatementsController(
             SessionService sessionService,
-            ConfirmStatementsService confirmStatementsService) {
+            ConfirmStatementsService confirmStatementsService,
+            TransactionsService transactionsService) {
+        this.transactionsService = transactionsService;
         this.confirmStatementsService = confirmStatementsService;
         this.sessionService = sessionService;
     }
@@ -85,6 +95,16 @@ public class ConfirmStatementsController {
 
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
+            // need to move this into post, triggered by user submit
+            Transaction transaction = new Transaction();
+            transaction.setPresenterStatements(new String [] {"verified-statement"});
+            transactionsService.updateTransaction(transactionId, transaction);
+
+            TransactionWithProtectedData patchTransaction = new TransactionWithProtectedData();
+            patchTransaction.setProtectedData(new ProtectedData());
+            var protectedData = patchTransaction.getProtectedData();
+            protectedData.setFormType("ACSP01");
+            transactionsService.patchTransaction(transactionId, patchTransaction);
         } catch (ServiceException e) {
             LOGGER.errorRequest(request, e);
             return ERROR_PAGE;

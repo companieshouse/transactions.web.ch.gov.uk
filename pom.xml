@@ -55,6 +55,8 @@
         <structured-logging.version>3.0.57</structured-logging.version>
         <!-- Source: https://github.com/companieshouse/web-security-java/releases -->
         <web-security-java.version>3.1.19</web-security-java.version>
+        <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
+        <private-api-sdk-java.version>7.2.50</private-api-sdk-java.version>
 
         <!-- Maven and Surefire plugins -->
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
@@ -272,6 +274,12 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>web-security-java</artifactId>
             <version>${web-security-java.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>private-api-sdk-java</artifactId>
+            <version>${private-api-sdk-java.version}</version>
         </dependency>
 
         <!-- Logging -->

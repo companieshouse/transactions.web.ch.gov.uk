@@ -27,6 +27,7 @@ import uk.gov.companieshouse.transactions.web.controller.confirmstatements.Confi
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +48,9 @@ class ConfirmStatementControllerTests {
 
     @Mock
     private SessionService sessionService;
+
+    @Mock
+    private TransactionsService transactionsService;
 
     @InjectMocks
     private ConfirmStatementsController controller;
