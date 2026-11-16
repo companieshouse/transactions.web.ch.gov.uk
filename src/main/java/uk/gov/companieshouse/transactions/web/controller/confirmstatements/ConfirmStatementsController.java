@@ -1,8 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
-import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims.RETURN_URL;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
-
 
 import java.util.List;
 
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
@@ -24,16 +24,13 @@ import uk.gov.companieshouse.api.model.transaction.Transaction;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
-import uk.gov.companieshouse.transactions.web.utils.jwthelpers.JwtHelpers;
 import uk.gov.companieshouse.transactions.web.TransactionsWebApplication;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
-import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
+import uk.gov.companieshouse.transactions.web.service.token.TokenService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
-import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
-
-
+import uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims;
 
 @Controller
 @RequestMapping(CONFIRM_STATEMENTS_PATH)
@@ -45,21 +42,25 @@ public class ConfirmStatementsController {
 
     private static final String TOKEN_PARAM = "token";
 
-    private static final String CLAIM_FORM_TYPE = "form-type";
+    private static final String CLAIM_FORM_TYPE = TokenClaims.FORM_TYPE;
 
     private final ConfirmStatementsService confirmStatementsService;
 
     private final SessionService sessionService;
+
+    private final TokenService tokenService;
 
     private final TransactionsService transactionsService;
 
     public ConfirmStatementsController(
             SessionService sessionService,
             ConfirmStatementsService confirmStatementsService,
+            TokenService tokenService
             TransactionsService transactionsService) {
         this.transactionsService = transactionsService;
         this.confirmStatementsService = confirmStatementsService;
         this.sessionService = sessionService;
+        this.tokenService = tokenService;
     }
 
     @GetMapping
@@ -67,18 +68,20 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
+            @RequestParam(value = "role", required = false) String userRole,
+            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
             HttpServletRequest request,
             Model model) {
 
-        JWTClaimsSet claims = JwtHelpers.readClaims(jwToken);
+        JWTClaimsSet claims = tokenService.verifyTransactionsWebToken(jwToken, transactionId);
 
         if (claims == null) {
-            LOGGER.errorContext(xRequestId, "Confirm Statements request JWT blank or malformed", null, null);
+            LOGGER.errorContext(xRequestId, "Confirm Statements request received with an invalid token", null, null);
             return ERROR_PAGE;
         }
 
         String chsUserId = sessionService.getUserId();
-        String formType = JwtHelpers.getStringClaim(claims, CLAIM_FORM_TYPE);
+        String formType = TokenService.getStringClaim(claims, CLAIM_FORM_TYPE);
 
         if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
             LOGGER.errorContext(xRequestId,
@@ -91,8 +94,15 @@ public class ConfirmStatementsController {
         LOGGER.infoContext(xRequestId,
                 "Confirm statements request received for " + transactionId + " and form type " + formType,
                 confirmStatementsDataMap.getLogMap());
-        List<Statement> confirmStatements;
 
+        if (selectedStatements != null && !selectedStatements.isEmpty()) {
+            // PUT/PATCH to go in here, I think.
+            String redirectUrl = TokenService.getStringClaim(claims, RETURN_URL);
+            return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
+                    + TokenService.getStringClaim(claims, "lang") + "&token=" + jwToken;
+        }
+
+        List<Statement> confirmStatements;
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
             // need to move this into post, triggered by user submit
@@ -110,15 +120,13 @@ public class ConfirmStatementsController {
             return ERROR_PAGE;
         }
 
-        model.addAttribute("nextPagePath", CONFIRM_STATEMENTS_NEXT_PAGE_PATH);
-        model.addAttribute("statements", confirmStatements);
         model.addAttribute(TOKEN_PARAM, jwToken);
+        model.addAttribute("statements", confirmStatements);
         return getTemplateName();
     }
 
     @ModelAttribute("templateName")
     private static String getTemplateName() {
-
         return "confirmStatement";
     }
 }
