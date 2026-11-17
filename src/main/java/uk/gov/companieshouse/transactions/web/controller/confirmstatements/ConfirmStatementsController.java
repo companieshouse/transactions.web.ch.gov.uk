@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +49,8 @@ public class ConfirmStatementsController {
 
     private static final String CLAIM_FORM_TYPE = TokenClaims.FORM_TYPE;
 
+    private static final String TRANSACTION_ID_PLACEHOLDER = "{transactionId}";
+
     private final ConfirmStatementsService confirmStatementsService;
 
     private final SessionService sessionService;
@@ -72,8 +75,6 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
-            @RequestParam(value = "role", required = false) String userRole,
-            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
             HttpServletRequest request,
             Model model) {
 
@@ -99,13 +100,6 @@ public class ConfirmStatementsController {
                 "Confirm statements request received for " + transactionId + " and form type " + formType,
                 confirmStatementsDataMap.getLogMap());
 
-        if (selectedStatements != null && !selectedStatements.isEmpty()) {
-            // PUT/PATCH to go in here, I think.
-            String redirectUrl = TokenService.getStringClaim(claims, RETURN_URL);
-            return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
-                    + TokenService.getStringClaim(claims, "lang") + "&token=" + jwToken;
-        }
-
         List<Statement> confirmStatements;
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
@@ -126,7 +120,41 @@ public class ConfirmStatementsController {
 
         model.addAttribute(TOKEN_PARAM, jwToken);
         model.addAttribute("statements", confirmStatements);
+        model.addAttribute("formAction", CONFIRM_STATEMENTS_PATH.replace(TRANSACTION_ID_PLACEHOLDER, transactionId));
         return getTemplateName();
+    }
+
+    @PostMapping
+    public String postStatementConfirmation(
+            @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
+            @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
+            @PathVariable("transactionId") String transactionId,
+            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements) {
+
+        JWTClaimsSet claims = tokenService.verifyTransactionsWebToken(jwToken, transactionId);
+
+        if (claims == null) {
+            LOGGER.errorContext(xRequestId, "Confirm Statements submission received with an invalid token", null, null);
+            return ERROR_PAGE;
+        }
+
+        String chsUserId = sessionService.getUserId();
+        if (chsUserId == null || chsUserId.isBlank() || transactionId == null || transactionId.isBlank()) {
+            LOGGER.errorContext(xRequestId,
+                    "Confirm statements submission received without a user id in the session or a transaction id",
+                    null, null);
+            return ERROR_PAGE;
+        }
+
+        if (selectedStatements == null || selectedStatements.isEmpty()) {
+            LOGGER.errorContext(xRequestId, "Confirm statements submission received without any selected statements",
+                    null, null);
+            return ERROR_PAGE;
+        }
+
+        String redirectUrl = TokenService.getStringClaim(claims, RETURN_URL);
+        return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
+                + TokenService.getStringClaim(claims, "lang") + "&token=" + jwToken;
     }
 
     @ModelAttribute("templateName")

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.transactions.web.controller.confirmstatement;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -77,18 +78,46 @@ class ConfirmStatementControllerTests {
                 TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk()).andExpect(view().name("confirmStatement"))
                 .andExpect(model().attribute("token", TOKEN))
+                .andExpect(model().attribute("formAction",
+                        CONFIRM_STATEMENTS_PATH.replace("{transactionId}", TRANSACTION_ID)))
                 .andExpect(model().attribute("templateName", "confirmStatement"));
     }
 
     @Test
-    @DisplayName("GET returns redirect if a list of statements is sent")
-    void getConfirmStatementAfterFormSubmit() throws Exception {
+    @DisplayName("GET displays the confirmation page even if selected statements are sent")
+    void getConfirmStatementWithSelectedStatements() throws Exception {
+        List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
+        when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
         givenValidToken();
         givenSessionUserId(USER_ID);
 
-        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN).param("selectedStatements",
-                "statement1", "statement2")).andExpect(status().is3xxRedirection())
+        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1", "statement2"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("confirmStatement"));
+    }
+
+    @Test
+    @DisplayName("POST redirects after statements are selected")
+    void postConfirmStatementAfterFormSubmit() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1", "statement2"))
+                .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:return-url?lang=en&token=transactions-web.token"));
+    }
+
+    @Test
+    @DisplayName("POST returns an error page if no statements are selected")
+    void postConfirmStatementWithoutSelectedStatements() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
     }
 
     @Test
