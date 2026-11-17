@@ -1,8 +1,7 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatements;
 
-import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_NEXT_PAGE_PATH;
+import static uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims.RETURN_URL;
 import static uk.gov.companieshouse.transactions.web.utils.constants.UrlConstants.CONFIRM_STATEMENTS_PATH;
-
 
 import java.util.List;
 
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
@@ -72,6 +72,8 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
+            @RequestParam(value = "role", required = false) String userRole,
+            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
             HttpServletRequest request,
             Model model) {
 
@@ -96,8 +98,15 @@ public class ConfirmStatementsController {
         LOGGER.infoContext(xRequestId,
                 "Confirm statements request received for " + transactionId + " and form type " + formType,
                 confirmStatementsDataMap.getLogMap());
-        List<Statement> confirmStatements;
 
+        if (selectedStatements != null && !selectedStatements.isEmpty()) {
+            // PUT/PATCH to go in here, I think.
+            String redirectUrl = TokenService.getStringClaim(claims, RETURN_URL);
+            return UrlBasedViewResolver.REDIRECT_URL_PREFIX + redirectUrl + "?lang="
+                    + TokenService.getStringClaim(claims, "lang") + "&token=" + jwToken;
+        }
+
+        List<Statement> confirmStatements;
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
             // need to move this into post, triggered by user submit
@@ -115,15 +124,13 @@ public class ConfirmStatementsController {
             return ERROR_PAGE;
         }
 
-        model.addAttribute("nextPagePath", CONFIRM_STATEMENTS_NEXT_PAGE_PATH);
-        model.addAttribute("statements", confirmStatements);
         model.addAttribute(TOKEN_PARAM, jwToken);
+        model.addAttribute("statements", confirmStatements);
         return getTemplateName();
     }
 
     @ModelAttribute("templateName")
     private static String getTemplateName() {
-
         return "confirmStatement";
     }
 }
