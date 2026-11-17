@@ -28,6 +28,7 @@ import uk.gov.companieshouse.transactions.web.controller.confirmstatements.Confi
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.token.TokenService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +40,7 @@ class ConfirmStatementControllerTests {
 
     private static final String TRANSACTION_ID = "123456-654321-123456";
 
-    private static final String TOKEN = new PlainJWT(claims()).serialize();
+    private static final String TOKEN = new PlainJWT(new JWTClaimsSet.Builder().build()).serialize();
 
     private MockMvc mockMvc;
 
@@ -48,9 +49,6 @@ class ConfirmStatementControllerTests {
 
     @Mock
     private SessionService sessionService;
-
-    @Mock
-    private TransactionsService transactionsService;
 
     @Mock
     private TokenService tokenService;
@@ -69,7 +67,7 @@ class ConfirmStatementControllerTests {
         List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
         givenValidToken();
-        givenSessionUserId(USER_ID);
+        givenSessionUserId();
 
         mockMvc.perform(get(
                 CONFIRM_STATEMENTS_PATH,
@@ -83,7 +81,7 @@ class ConfirmStatementControllerTests {
     @DisplayName("GET returns redirect if a list of statements is sent")
     void getConfirmStatementAfterFormSubmit() throws Exception {
         givenValidToken();
-        givenSessionUserId(USER_ID);
+        givenSessionUserId();
 
         mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN).param("selectedStatements",
                 "statement1", "statement2")).andExpect(status().is3xxRedirection())
@@ -94,7 +92,7 @@ class ConfirmStatementControllerTests {
     @DisplayName("GET returns an error page if statements to confirm can't be retrieved")
     void getConfirmStatementError() throws Exception {
         givenValidToken();
-        givenSessionUserId(USER_ID);
+        givenSessionUserId();
         when(confirmStatementsService.getConfirmStatements(USER_ID)).thenThrow(new ServiceException("some error"));
         mockMvc.perform(get(
                 CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
@@ -145,7 +143,7 @@ class ConfirmStatementControllerTests {
         when(tokenService.verifyTransactionsWebToken(TOKEN, TRANSACTION_ID)).thenReturn(claims);
     }
 
-    private void givenSessionUserId(String userId) {
-        when(sessionService.getUserId()).thenReturn(userId);
+    private void givenSessionUserId() {
+        when(sessionService.getUserId()).thenReturn(USER_ID);
     }
 }

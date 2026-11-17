@@ -167,7 +167,7 @@ class TokenServiceTests {
         return new Date(System.currentTimeMillis() + 60_000);
     }
 
-    private static JWTClaimsSet claims(String formType, String transactionId, String role, Date expiry) {
+    public static JWTClaimsSet claims(String formType, String transactionId, String role, Date expiry) {
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder().claim("transaction_id", transactionId);
         if (formType != null) {
             builder.claim("form_type", formType);

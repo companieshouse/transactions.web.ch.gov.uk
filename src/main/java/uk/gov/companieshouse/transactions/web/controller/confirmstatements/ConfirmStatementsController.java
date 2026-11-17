@@ -21,6 +21,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 
 import uk.gov.companieshouse.api.model.transaction.ProtectedData;
 import uk.gov.companieshouse.api.model.transaction.Transaction;
+import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
@@ -29,6 +30,7 @@ import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
 import uk.gov.companieshouse.transactions.web.service.token.TokenService;
+import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 import uk.gov.companieshouse.transactions.web.utils.constants.TokenClaims;
 
@@ -55,7 +57,7 @@ public class ConfirmStatementsController {
     public ConfirmStatementsController(
             SessionService sessionService,
             ConfirmStatementsService confirmStatementsService,
-            TokenService tokenService
+            TokenService tokenService,
             TransactionsService transactionsService) {
         this.transactionsService = transactionsService;
         this.confirmStatementsService = confirmStatementsService;
