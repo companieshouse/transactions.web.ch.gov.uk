@@ -149,6 +149,45 @@ class ConfirmStatementControllerTests {
     }
 
     @Test
+    @DisplayName("POST returns the error page if the transaction patch fails")
+    void postConfirmStatementPatchError() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+        doThrow(new ServiceException("some error")).when(transactionsService)
+                .patchTransaction(eq(TRANSACTION_ID), any(TransactionWithProtectedData.class));
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+    }
+
+    @Test
+    @DisplayName("POST returns the error page if the token fails verification")
+    void postTokenInvalidError() throws Exception {
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(transactionsService);
+    }
+
+    @Test
+    @DisplayName("POST without a signed-in session returns the error page")
+    void postWithoutSession() throws Exception {
+        givenValidToken();
+        when(sessionService.getUserId()).thenReturn(null);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(transactionsService);
+    }
+
+    @Test
     @DisplayName("GET returns an error page if statements to confirm can't be retrieved")
     void getConfirmStatementError() throws Exception {
         givenValidToken();
