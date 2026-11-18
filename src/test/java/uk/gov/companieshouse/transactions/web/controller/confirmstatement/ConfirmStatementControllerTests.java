@@ -1,5 +1,10 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatement;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +29,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
+import uk.gov.companieshouse.api.model.transaction.Transaction;
+import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
@@ -81,6 +88,8 @@ class ConfirmStatementControllerTests {
                 .andExpect(model().attribute("formAction",
                         CONFIRM_STATEMENTS_PATH.replace("{transactionId}", TRANSACTION_ID)))
                 .andExpect(model().attribute("templateName", "confirmStatement"));
+
+        verifyNoInteractions(transactionsService);
     }
 
     @Test
@@ -107,6 +116,25 @@ class ConfirmStatementControllerTests {
                 .param("selectedStatements", "statement1", "statement2"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:return-url?lang=en&token=transactions-web.token"));
+
+        verify(transactionsService).updateTransaction(eq(TRANSACTION_ID), any(Transaction.class));
+        verify(transactionsService).patchTransaction(eq(TRANSACTION_ID), any(TransactionWithProtectedData.class));
+    }
+
+    @Test
+    @DisplayName("POST returns the error page if the transaction update fails")
+    void postConfirmStatementUpdateError() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+        doThrow(new ServiceException("some error")).when(transactionsService)
+                .updateTransaction(eq(TRANSACTION_ID), any(Transaction.class));
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verify(transactionsService, never()).patchTransaction(any(), any());
     }
 
     @Test

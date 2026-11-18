@@ -103,16 +103,6 @@ public class ConfirmStatementsController {
         List<Statement> confirmStatements;
         try {
             confirmStatements = confirmStatementsService.getConfirmStatements(chsUserId);
-            // need to move this into post, triggered by user submit
-            Transaction transaction = new Transaction();
-            transaction.setPresenterStatements(new String [] {"verified-statement"});
-            transactionsService.updateTransaction(transactionId, transaction);
-
-            TransactionWithProtectedData patchTransaction = new TransactionWithProtectedData();
-            patchTransaction.setProtectedData(new ProtectedData());
-            var protectedData = patchTransaction.getProtectedData();
-            protectedData.setFormType("ACSP01");
-            transactionsService.patchTransaction(transactionId, patchTransaction);
         } catch (ServiceException e) {
             LOGGER.errorRequest(request, e);
             return ERROR_PAGE;
@@ -129,7 +119,8 @@ public class ConfirmStatementsController {
             @RequestHeader(value = "X_REQUEST_ID", required = false) String xRequestId,
             @RequestParam(value = TOKEN_PARAM, required = true) String jwToken,
             @PathVariable("transactionId") String transactionId,
-            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements) {
+            @RequestParam(value = "selectedStatements", required = false) List<String> selectedStatements,
+            HttpServletRequest request) {
 
         JWTClaimsSet claims = tokenService.verifyTransactionsWebToken(jwToken, transactionId);
 
@@ -149,6 +140,21 @@ public class ConfirmStatementsController {
         if (selectedStatements == null || selectedStatements.isEmpty()) {
             LOGGER.errorContext(xRequestId, "Confirm statements submission received without any selected statements",
                     null, null);
+            return ERROR_PAGE;
+        }
+
+        try {
+            Transaction transaction = new Transaction();
+            transaction.setPresenterStatements(new String[] {"verified-statement"});
+            transactionsService.updateTransaction(transactionId, transaction);
+
+            ProtectedData protectedData = new ProtectedData();
+            protectedData.setFormType("ACSP01");
+            TransactionWithProtectedData patchTransaction = new TransactionWithProtectedData();
+            patchTransaction.setProtectedData(protectedData);
+            transactionsService.patchTransaction(transactionId, patchTransaction);
+        } catch (ServiceException e) {
+            LOGGER.errorRequest(request, e);
             return ERROR_PAGE;
         }
 

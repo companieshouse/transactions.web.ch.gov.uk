@@ -56,7 +56,7 @@
         <!-- Source: https://github.com/companieshouse/web-security-java/releases -->
         <web-security-java.version>3.1.19</web-security-java.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
-        <private-api-sdk-java.version>unversioned</private-api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.51</private-api-sdk-java.version>
 
         <!-- Maven and Surefire plugins -->
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
