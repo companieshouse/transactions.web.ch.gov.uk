@@ -1,8 +1,14 @@
 package uk.gov.companieshouse.transactions.web.controller.confirmstatement;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -23,10 +29,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
+import uk.gov.companieshouse.api.model.transaction.Transaction;
+import uk.gov.companieshouse.api.model.transaction.TransactionWithProtectedData;
 import uk.gov.companieshouse.transactions.web.controller.confirmstatements.ConfirmStatementsController;
 import uk.gov.companieshouse.transactions.web.exception.ServiceException;
 import uk.gov.companieshouse.transactions.web.model.statement.Statement;
 import uk.gov.companieshouse.transactions.web.service.confirmstatements.ConfirmStatementsService;
+import uk.gov.companieshouse.transactions.web.service.transaction.TransactionsService;
 import uk.gov.companieshouse.transactions.web.service.token.TokenService;
 import uk.gov.companieshouse.transactions.web.session.SessionService;
 
@@ -52,6 +61,9 @@ class ConfirmStatementControllerTests {
     @Mock
     private TokenService tokenService;
 
+    @Mock
+    private TransactionsService transactionsService;
+
     @InjectMocks
     private ConfirmStatementsController controller;
 
@@ -73,18 +85,106 @@ class ConfirmStatementControllerTests {
                 TRANSACTION_ID).param("token", TOKEN))
                 .andExpect(status().isOk()).andExpect(view().name("confirmStatement"))
                 .andExpect(model().attribute("token", TOKEN))
+                .andExpect(model().attribute("formAction",
+                        CONFIRM_STATEMENTS_PATH.replace("{transactionId}", TRANSACTION_ID)))
                 .andExpect(model().attribute("templateName", "confirmStatement"));
+
+        verifyNoInteractions(transactionsService);
     }
 
     @Test
-    @DisplayName("GET returns redirect if a list of statements is sent")
-    void getConfirmStatementAfterFormSubmit() throws Exception {
+    @DisplayName("GET displays the confirmation page even if selected statements are sent")
+    void getConfirmStatementWithSelectedStatements() throws Exception {
+        List<Statement> mockedStatements = List.of(new Statement("id", "statementText"));
+        when(confirmStatementsService.getConfirmStatements(USER_ID)).thenReturn(mockedStatements);
         givenValidToken();
         givenSessionUserId(USER_ID);
 
-        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN).param("selectedStatements",
-                "statement1", "statement2")).andExpect(status().is3xxRedirection())
+        mockMvc.perform(get(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1", "statement2"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("confirmStatement"));
+    }
+
+    @Test
+    @DisplayName("POST redirects after statements are selected")
+    void postConfirmStatementAfterFormSubmit() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1", "statement2"))
+                .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:return-url?lang=en&token=transactions-web.token"));
+
+        verify(transactionsService).updateTransaction(eq(TRANSACTION_ID), any(Transaction.class));
+        verify(transactionsService).patchTransaction(eq(TRANSACTION_ID), any(TransactionWithProtectedData.class));
+    }
+
+    @Test
+    @DisplayName("POST returns the error page if the transaction update fails")
+    void postConfirmStatementUpdateError() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+        doThrow(new ServiceException("some error")).when(transactionsService)
+                .updateTransaction(eq(TRANSACTION_ID), any(Transaction.class));
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verify(transactionsService, never()).patchTransaction(any(), any());
+    }
+
+    @Test
+    @DisplayName("POST returns an error page if no statements are selected")
+    void postConfirmStatementWithoutSelectedStatements() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+    }
+
+    @Test
+    @DisplayName("POST returns the error page if the transaction patch fails")
+    void postConfirmStatementPatchError() throws Exception {
+        givenValidToken();
+        givenSessionUserId(USER_ID);
+        doThrow(new ServiceException("some error")).when(transactionsService)
+                .patchTransaction(eq(TRANSACTION_ID), any(TransactionWithProtectedData.class));
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+    }
+
+    @Test
+    @DisplayName("POST returns the error page if the token fails verification")
+    void postTokenInvalidError() throws Exception {
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(transactionsService);
+    }
+
+    @Test
+    @DisplayName("POST without a signed-in session returns the error page")
+    void postWithoutSession() throws Exception {
+        givenValidToken();
+        when(sessionService.getUserId()).thenReturn(null);
+
+        mockMvc.perform(post(CONFIRM_STATEMENTS_PATH, TRANSACTION_ID).param("token", TOKEN)
+                .param("selectedStatements", "statement1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
+
+        verifyNoInteractions(transactionsService);
     }
 
     @Test
