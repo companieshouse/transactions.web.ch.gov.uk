@@ -92,6 +92,9 @@ public class WhatIsYourRoleController {
         try {
             List<PresenterType> presenterTypes = presenterTypesService.getPresenterTypes(chsUserId, formType);
 
+            LOG.infoContext(xRequestId, "Retrieved presenter types " + presenterTypes.stream()
+                    .map(PresenterType::getId).toList() + " for form type " + formType, dataMap.getLogMap());
+
             model.addAttribute(WHAT_IS_YOUR_ROLE_ATTRIBUTE, toWhatIsYourRole(presenterTypes));
             model.addAttribute(TOKEN_PARAM, token);
             model.addAttribute("formType", formType);
